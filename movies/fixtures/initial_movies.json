@@ -1,0 +1,317 @@
+[
+    {
+        "model": "movies.movie",
+        "pk": 1,
+        "fields": {
+            "title": "8½",
+            "original_title": "Otto e mezzo",
+            "director": "Federico Fellini",
+            "release_year": 1963,
+            "description": "A celebrated filmmaker struggles with creative block while reflecting on his life, dreams, and the nature of cinema itself.",
+            "runtime": 138,
+            "country": "Italy",
+            "movement": "Italian Neorealism",
+            "cinematographer": "Gianni Di Venanzo",
+            "poster": "posters/8_half.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "8-half",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 2,
+        "fields": {
+            "title": "Persona",
+            "original_title": "Persona",
+            "director": "Ingmar Bergman",
+            "release_year": 1966,
+            "description": "A nurse and her patient, an actress who has become mute, develop an intense relationship that blurs the boundaries between their identities.",
+            "runtime": 83,
+            "country": "Sweden",
+            "movement": "European Art Cinema",
+            "cinematographer": "Sven Nykvist",
+            "poster": "posters/persona.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "persona",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 3,
+        "fields": {
+            "title": "Breathless",
+            "original_title": "À bout de souffle",
+            "director": "Jean-Luc Godard",
+            "release_year": 1960,
+            "description": "A small-time thief steals a car and murders a policeman. While on the run, he reconnects with a girl he had a brief affair with, and tries to convince her to run away with him.",
+            "runtime": 90,
+            "country": "France",
+            "movement": "French New Wave",
+            "cinematographer": "Raoul Coutard",
+            "poster": "posters/breathless.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "breathless",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 4,
+        "fields": {
+            "title": "Mirror",
+            "original_title": "Зеркало",
+            "director": "Andrei Tarkovsky",
+            "release_year": 1975,
+            "description": "A dying man in his forties remembers his past. His childhood, his mother, the war, personal moments and things that tell of the recent history of all the Russian nation.",
+            "runtime": 107,
+            "country": "Soviet Union",
+            "movement": "Soviet Art Cinema",
+            "cinematographer": "Georgy Rerberg",
+            "poster": "posters/mirror.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "mirror",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 5,
+        "fields": {
+            "title": "Tokyo Story",
+            "original_title": "東京物語",
+            "director": "Yasujirō Ozu",
+            "release_year": 1953,
+            "description": "An elderly couple visit their children and grandchildren in Tokyo, but receive little attention as everyone is preoccupied with their own lives.",
+            "runtime": 136,
+            "country": "Japan",
+            "movement": "Japanese New Wave",
+            "cinematographer": "Yuharu Atsuta",
+            "poster": "posters/tokyo_story.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "tokyo-story",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 6,
+        "fields": {
+            "title": "Wings of Desire",
+            "original_title": "Der Himmel über Berlin",
+            "director": "Wim Wenders",
+            "release_year": 1987,
+            "description": "An angel tires of overseeing human activity and wishes to become human when he falls in love with a mortal.",
+            "runtime": 128,
+            "country": "West Germany",
+            "movement": "New German Cinema",
+            "cinematographer": "Henri Alekan",
+            "poster": "posters/wings_of_desire.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "wings-of-desire",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 7,
+        "fields": {
+            "title": "In the Mood for Love",
+            "original_title": "花樣年華",
+            "director": "Wong Kar-wai",
+            "release_year": 2000,
+            "description": "Two neighbors form a strong bond after both suspect extramarital activities of their spouses.",
+            "runtime": 98,
+            "country": "Hong Kong",
+            "movement": "Hong Kong New Wave",
+            "cinematographer": "Christopher Doyle",
+            "poster": "posters/in_the_mood_for_love.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "in-the-mood-for-love",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 8,
+        "fields": {
+            "title": "The Seventh Seal",
+            "original_title": "Det sjunde inseglet",
+            "director": "Ingmar Bergman",
+            "release_year": 1957,
+            "description": "A knight returning from the Crusades encounters Death, who agrees to a chess match. In the meantime, the knight tries to resolve his doubts about faith.",
+            "runtime": 96,
+            "country": "Sweden",
+            "movement": "European Art Cinema",
+            "cinematographer": "Gunnar Fischer",
+            "poster": "posters/seventh_seal.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "the-seventh-seal",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 9,
+        "fields": {
+            "title": "Stalker",
+            "original_title": "Сталкер",
+            "director": "Andrei Tarkovsky",
+            "release_year": 1979,
+            "description": "A guide leads two men through an area known as the Zone to find a room that grants wishes.",
+            "runtime": 162,
+            "country": "Soviet Union",
+            "movement": "Soviet Art Cinema",
+            "cinematographer": "Alexander Knyazhinsky",
+            "poster": "posters/stalker.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "stalker",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 10,
+        "fields": {
+            "title": "La Dolce Vita",
+            "original_title": "La dolce vita",
+            "director": "Federico Fellini",
+            "release_year": 1960,
+            "description": "A series of stories following a week in the life of a philandering tabloid journalist living in Rome.",
+            "runtime": 174,
+            "country": "Italy",
+            "movement": "Italian Neorealism",
+            "cinematographer": "Otello Martelli",
+            "poster": "posters/la_dolce_vita.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "la-dolce-vita",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 11,
+        "fields": {
+            "title": "Cléo from 5 to 7",
+            "original_title": "Cléo de 5 à 7",
+            "director": "Agnès Varda",
+            "release_year": 1962,
+            "description": "Follows a young singer over two hours as she awaits the results of a biopsy and fears she may have cancer.",
+            "runtime": 90,
+            "country": "France",
+            "movement": "French New Wave",
+            "cinematographer": "Jean Rabier",
+            "poster": "posters/cleo.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "cleo-from-5-to-7",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 12,
+        "fields": {
+            "title": "Rashomon",
+            "original_title": "羅生門",
+            "director": "Akira Kurosawa",
+            "release_year": 1950,
+            "description": "The rape of a bride and the murder of her samurai husband are recalled from the perspectives of a bandit, the bride, the samurai's ghost and a woodcutter.",
+            "runtime": 88,
+            "country": "Japan",
+            "movement": "Japanese New Wave",
+            "cinematographer": "Kazuo Miyagawa",
+            "poster": "posters/rashomon.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "rashomon",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 13,
+        "fields": {
+            "title": "The 400 Blows",
+            "original_title": "Les Quatre Cents Coups",
+            "director": "François Truffaut",
+            "release_year": 1959,
+            "description": "A young boy, left without attention, delves into a life of petty crime.",
+            "runtime": 99,
+            "country": "France",
+            "movement": "French New Wave",
+            "cinematographer": "Henri Decaë",
+            "poster": "posters/400_blows.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "the-400-blows",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 14,
+        "fields": {
+            "title": "Bicycle Thieves",
+            "original_title": "Ladri di biciclette",
+            "director": "Vittorio De Sica",
+            "release_year": 1948,
+            "description": "In post-war Italy, a working-class man's bicycle is stolen, endangering his job. He and his son set out to find it.",
+            "runtime": 89,
+            "country": "Italy",
+            "movement": "Italian Neorealism",
+            "cinematographer": "Carlo Montuori",
+            "poster": "posters/bicycle_thieves.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "bicycle-thieves",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    },
+    {
+        "model": "movies.movie",
+        "pk": 15,
+        "fields": {
+            "title": "Andrei Rublev",
+            "original_title": "Андрей Рублёв",
+            "director": "Andrei Tarkovsky",
+            "release_year": 1966,
+            "description": "The life, times and hardships of the 15th-century Russian iconographer St. Andrei Rublev.",
+            "runtime": 205,
+            "country": "Soviet Union",
+            "movement": "Soviet Art Cinema",
+            "cinematographer": "Vadim Yusov",
+            "poster": "posters/andrei_rublev.jpg",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "slug": "andrei-rublev",
+            "average_rating": 0.0,
+            "total_ratings": 0
+        }
+    }
+] 
