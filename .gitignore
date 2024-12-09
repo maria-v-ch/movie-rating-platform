@@ -57,6 +57,10 @@ logs/
 htmlcov/
 .pytest_cache/
 .mypy_cache/
+.md/
+.specs/
+examplary_confs/
+docs/
 
 # Docker
 .docker/
