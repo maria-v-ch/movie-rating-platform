@@ -60,6 +60,7 @@ htmlcov/
 .md/
 .specs/
 examplary_confs/
+examplary\ confs/
 docs/
 
 # Docker
