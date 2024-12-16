@@ -32,7 +32,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+ALLOWED_HOSTS = [host.strip() for host in env.str('ALLOWED_HOSTS', default='localhost').split(',')]
 
 # Application definition
 INSTALLED_APPS = [
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'drf_yasg',
+    'django_filters',
     # Local apps
     'movies.apps.MoviesConfig',
     'users.apps.UsersConfig',
@@ -55,8 +56,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Note: Should be placed before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -88,11 +90,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
+        'NAME': env('DB_NAME', default='movie_rating_db'),
+        'USER': env('DB_USER', default='postgres'),
+        'PASSWORD': env('DB_PASSWORD', default='postgres'),
+        'HOST': env('DB_HOST', default='db'),  # Using 'db' as default for Docker
+        'PORT': env('DB_PORT', default='5432'),
     }
 }
 
@@ -145,6 +147,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
@@ -157,18 +162,29 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
 
 # Security settings
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = True
-CSRF_USE_SESSIONS = True
-CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', default=False)
+CSRF_COOKIE_HTTPONLY = False # Allow JavaScript access to CSRF cookie
+CSRF_USE_SESSIONS = False # Store CSRF token in cookie instead of session
+CSRF_COOKIE_SAMESITE = 'Lax' # Less strict SameSite policy
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+] + env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
+# Update CORS settings
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG # Allow all origins in development
+
 
 # Session Settings
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG  # Only use HTTPS in production
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Lax'  # Less strict in development
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # HTML sanitization
@@ -177,10 +193,12 @@ BLEACH_ALLOWED_ATTRIBUTES = {'a': ['href', 'title']}
 BLEACH_STRIP_TAGS = True
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-])
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8000",
+#     "http://127.0.0.1:8000",
+#     "http://192.168.0.104:8000",
+#     "https://paragoni.space",
+# ] + env.list('CORS_ALLOWED_ORIGINS', default=[])
 
 # JWT settings
 SIMPLE_JWT = {
@@ -254,7 +272,7 @@ if not os.path.exists(LOGS_DIR):
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': 'redis://redis:6379/1',  # Use service name from docker-compose
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -262,7 +280,7 @@ CACHES = {
 }
 
 # Cache timeout settings
-CACHE_TTL = 300  # 5 minutes
+CACHE_TTL = 60 * 15  # 15 minutes
 CACHE_MIDDLEWARE_SECONDS = CACHE_TTL
 
 # Cache timeout for popular movies (12 hours)

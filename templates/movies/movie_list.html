@@ -1,53 +1,49 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Movies - Art House Cinema{% endblock %}
 
 {% block content %}
 <div class="container">
     <!-- Filters -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Movement</label>
-                            <select name="movement" class="form-select">
-                                <option value="">All Movements</option>
-                                {% for movement in movements %}
-                                    <option value="{{ movement }}" {% if request.GET.movement == movement %}selected{% endif %}>
-                                        {{ movement }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Director</label>
-                            <select name="director" class="form-select">
-                                <option value="">All Directors</option>
-                                {% for director in directors %}
-                                    <option value="{{ director }}" {% if request.GET.director == director %}selected{% endif %}>
-                                        {{ director }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Sort By</label>
-                            <select name="sort" class="form-select">
-                                <option value="year">Year</option>
-                                <option value="-year">Year (Descending)</option>
-                                <option value="rating">Rating</option>
-                                <option value="-rating">Rating (Descending)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                        </div>
-                    </form>
-                </div>
+    <div class="mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <select name="director" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Directors</option>
+                    {% for dir in directors %}
+                        <option value="{{ dir.director }}" {% if dir.director == current_director %}selected{% endif %}>
+                            {{ dir.director }} ({{ dir.movie_count }})
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
-        </div>
+            <div class="col-md-3">
+                <select name="movement" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Movements</option>
+                    {% for mov in movements %}
+                        <option value="{{ mov.movement }}" {% if mov.movement == current_movement %}selected{% endif %}>
+                            {{ mov.movement }} ({{ mov.movie_count }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="year" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Years</option>
+                    {% for year in years %}
+                        <option value="{{ year }}" {% if year|stringformat:"i" == current_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='{% url 'movies:movie-list' %}'">
+                    Clear Filters
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Movie Grid -->
@@ -55,37 +51,25 @@
         {% for movie in movies %}
         <div class="col">
             <div class="card h-100 movie-card">
-                {% if movie.poster_url %}
-                    <img src="{{ movie.poster_url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 400px; object-fit: cover;">
-                {% else %}
-                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 400px;">
-                        <i class="fas fa-film fa-3x text-light"></i>
-                    </div>
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ movie.title }} ({{ movie.year }})</h5>
-                    <p class="card-text text-muted">{{ movie.director }}</p>
-                    <div class="mb-2">
-                        {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= movie.average_rating %}
-                                <i class="fas fa-star rating-star"></i>
-                            {% else %}
-                                <i class="far fa-star rating-star"></i>
-                            {% endif %}
-                        {% endfor %}
-                        <span class="ms-2">({{ movie.review_count }} reviews)</span>
-                    </div>
-                    <p class="card-text">{{ movie.description|truncatewords:30 }}</p>
+                <div class="card-img-wrapper">
+                    <img src="{{ movie.poster_url }}" class="card-img-top" alt="{{ movie.title }}">
                 </div>
-                <div class="card-footer bg-transparent">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="{% url 'movies:movie-detail' movie.id %}" class="btn btn-outline-primary">View Details</a>
-                        {% if user.is_authenticated %}
-                            <button class="btn btn-outline-danger favorite-btn" data-movie-id="{{ movie.id }}">
-                                <i class="{% if movie in user.favorite_movies.all %}fas{% else %}far{% endif %} fa-heart"></i>
-                            </button>
-                        {% endif %}
-                    </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ movie.title }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">{{ movie.director }} ({{ movie.release_year }})</small>
+                    </p>
+                    <p class="card-text">
+                        <span class="rating">
+                            {% if movie.average_rating > 0 %}
+                                {{ movie.average_rating|floatformat:1 }}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                No ratings yet
+                            {% endif %}
+                        </span>
+                    </p>
+                    <a href="{% url 'movies:movie-detail' movie.slug %}" class="btn btn-primary">View Details</a>
                 </div>
             </div>
         </div>
@@ -98,7 +82,6 @@
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
     {% if is_paginated %}
     <nav class="mt-4">
         <ul class="pagination justify-content-center">
@@ -129,6 +112,7 @@
     </nav>
     {% endif %}
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -170,5 +154,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-{% endblock %}
 {% endblock %} 

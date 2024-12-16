@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
+from decimal import Decimal
 
 class Review(models.Model):
     movie = models.ForeignKey('movies.Movie', on_delete=models.CASCADE, related_name='reviews')
@@ -29,11 +30,11 @@ class Rating(models.Model):
     movie = models.ForeignKey('movies.Movie', on_delete=models.CASCADE, related_name='ratings')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings')
     score = models.DecimalField(
-        max_digits=2,
+        max_digits=3,
         decimal_places=1,
         validators=[
-            MinValueValidator(0.0),
-            MaxValueValidator(5.0)
+            MinValueValidator(Decimal('0.0')),
+            MaxValueValidator(Decimal('5.0'))
         ]
     )
     created_at = models.DateTimeField(auto_now_add=True)

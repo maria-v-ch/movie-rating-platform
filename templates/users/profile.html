@@ -1,43 +1,73 @@
 {% extends 'base.html' %}
-{% load user_filters %}
 
 {% block title %}{{ user.username }}'s Profile - Art House Cinema{% endblock %}
 
 {% block content %}
+<style>
+.card-img-wrapper {
+    position: relative;
+    padding-top: 150%; /* 2:3 aspect ratio */
+    overflow: hidden;
+}
+
+.card-img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.movie-card {
+    transition: transform 0.2s;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+
 <div class="container py-5">
     <!-- Profile Header -->
-    <div class="row mb-5">
+    <div class="row mb-4">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 text-center">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
                             {% if user.profile_image %}
-                                <img src="{{ user.profile_image.url }}" class="rounded-circle img-fluid" alt="{{ user.username }}" style="width: 200px; height: 200px; object-fit: cover;">
+                                <img src="{{ user.profile_image.url }}" class="rounded-circle img-fluid" alt="{{ user.username }}" style="width: 120px; height: 120px; object-fit: cover;">
                             {% else %}
-                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 200px; height: 200px;">
-                                    <i class="fas fa-user fa-4x text-light"></i>
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x text-light"></i>
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="col-md-9">
-                            <h1 class="display-4">{{ user.username }}</h1>
-                            <p class="lead">{{ user.bio|default:"No bio provided" }}</p>
-                            <div class="d-flex gap-3">
+                        <div class="col-md-10">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div>
-                                    <h5>Reviews</h5>
-                                    <p class="h3">{{ user.reviews.count }}</p>
+                                    <h2 class="mb-0">{{ user.username }}</h2>
+                                    <p class="text-muted mb-2">{{ user.bio|default:"No bio provided" }}</p>
                                 </div>
-                                <div>
-                                    <h5>Favorite Movies</h5>
-                                    <p class="h3">{{ user.favorite_movies.count }}</p>
+                                {% if user == request.user %}
+                                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                        Edit Profile
+                                    </button>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex gap-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="text-center me-3">
+                                        <p class="h4 mb-0">{{ user.reviews.count }}</p>
+                                        <small class="text-muted">Reviews</small>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="h4 mb-0">{{ user.favorite_movies.count }}</p>
+                                        <small class="text-muted">Favorites</small>
+                                    </div>
                                 </div>
                             </div>
-                            {% if user == request.user %}
-                                <button class="btn btn-outline-primary mt-3" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                    Edit Profile
-                                </button>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -48,12 +78,12 @@
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="favorites-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button">
+            <button class="nav-link active fw-bold text-black" style="color: black !important;" id="favorites-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button" role="tab">
                 Favorite Movies
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button">
+            <button class="nav-link fw-bold text-black" style="color: black !important;" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
                 Reviews
             </button>
         </li>
@@ -67,28 +97,27 @@
                 {% for movie in user.favorite_movies.all %}
                 <div class="col">
                     <div class="card h-100 movie-card">
-                        {% if movie.poster_url %}
-                            <img src="{{ movie.poster_url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 300px; object-fit: cover;">
-                        {% else %}
-                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
-                                <i class="fas fa-film fa-3x text-light"></i>
-                            </div>
-                        {% endif %}
+                        <div class="card-img-wrapper">
+                            <img src="{{ movie.poster_url }}" class="card-img-top" alt="{{ movie.title }}">
+                        </div>
                         <div class="card-body">
                             <h5 class="card-title">{{ movie.title }}</h5>
-                            <p class="card-text text-muted">{{ movie.year }}</p>
-                            <div class="mb-2">
-                                {% for i in "12345"|make_list %}
-                                    {% if forloop.counter <= movie.average_rating %}
-                                        <i class="fas fa-star rating-star"></i>
+                            <p class="card-text">
+                                <small class="text-muted">{{ movie.director }} ({{ movie.release_year }})</small>
+                            </p>
+                            <p class="card-text">
+                                <span class="rating">
+                                    {% if movie.average_rating > 0 %}
+                                        {{ movie.average_rating|floatformat:1 }}
+                                        <i class="fas fa-star text-warning"></i>
                                     {% else %}
-                                        <i class="far fa-star rating-star"></i>
+                                        No ratings yet
                                     {% endif %}
-                                {% endfor %}
-                            </div>
+                                </span>
+                            </p>
                         </div>
-                        <div class="card-footer bg-transparent">
-                            <a href="{% url 'movies:movie-detail' movie.id %}" class="btn btn-outline-primary w-100">View Details</a>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="{% url 'movies:movie-detail' movie.slug %}" class="btn btn-outline-primary w-100">View Details</a>
                         </div>
                     </div>
                 </div>
@@ -109,23 +138,20 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title">
-                            <a href="{% url 'movies:movie-detail' review.movie.id %}" class="text-decoration-none">
+                            <a href="{% url 'movies:movie-detail' review.movie.slug %}" class="text-decoration-none">
                                 {{ review.movie.title }}
                             </a>
                         </h5>
                         <div>
-                            {% with rating=review.movie.ratings.get_or_none %}
-                                {% if rating %}
-                                    {% for i in "12345"|make_list %}
-                                        {% if forloop.counter <= rating.score %}
-                                            <i class="fas fa-star rating-star"></i>
-                                        {% else %}
-                                            <i class="far fa-star rating-star"></i>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="text-muted">No rating</span>
-                                {% endif %}
+                            {% with rating=review.movie.average_rating %}
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <small class="text-muted">({{ review.movie.total_ratings }})</small>
                             {% endwith %}
                         </div>
                     </div>
@@ -166,11 +192,11 @@
                         <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </div>
     </div>

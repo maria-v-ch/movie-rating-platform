@@ -9,7 +9,12 @@ from rest_framework.response import Response
 from .models import User
 from .forms import UserRegistrationForm, UserUpdateForm
 from .serializers import UserSerializer, UserCreateSerializer, UserUpdateSerializer
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
+from django.http import HttpResponseRedirect
+from django.contrib import messages
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class RegisterView(SuccessMessageMixin, CreateView):
     template_name = 'users/register.html'
     form_class = UserRegistrationForm
@@ -29,10 +34,11 @@ class LoginView(AuthLoginView):
 class LogoutView(AuthLogoutView):
     next_page = reverse_lazy('movies:movie-list')
 
-class ProfileView(LoginRequiredMixin, DetailView):
+class ProfileView(LoginRequiredMixin, UpdateView):
     model = User
     template_name = 'users/profile.html'
-    context_object_name = 'profile_user'
+    fields = ['email', 'bio', 'profile_image']
+    success_url = reverse_lazy('users:profile')
 
     def get_object(self):
         return self.request.user
@@ -44,9 +50,17 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context['ratings'] = user.ratings.select_related('movie').order_by('-created_at')[:5]
         return context
 
+    def form_valid(self, form):
+        messages.success(self.request, 'Profile updated successfully!')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Error updating profile. Please check the form.')
+        return super().form_invalid(form)
+
 class ProfileUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = User
-    template_name = 'users/profile_edit.html'
+    template_name = 'users/profile.html'
     form_class = UserUpdateForm
     success_url = reverse_lazy('users:profile')
     success_message = "Your profile was updated successfully."
@@ -59,7 +73,7 @@ class FavoritesView(LoginRequiredMixin, ListView):
     context_object_name = 'favorite_movies'
 
     def get_queryset(self):
-        return self.request.user.favorite_movies.all()
+        return self.request.user.favorited_movies.all()
 
 # API Views
 class UserViewSet(viewsets.ModelViewSet):
@@ -69,29 +83,33 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
-        elif self.action == 'update' or self.action == 'partial_update':
+        elif self.action in ['update', 'partial_update']:
             return UserUpdateSerializer
         return UserSerializer
 
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.AllowAny()]
-        return super().get_permissions()
+        elif self.action in ['list', 'retrieve']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return User.objects.none()
         if user.is_staff:
             return User.objects.all()
         return User.objects.filter(id=user.id)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['put'])
+    @action(detail=False, methods=['put', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def update_me(self, request):
-        serializer = UserUpdateSerializer(request.user, data=request.data, context={'request': request})
+        serializer = UserUpdateSerializer(request.user, data=request.data, context={'request': request}, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

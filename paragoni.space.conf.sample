@@ -1,0 +1,33 @@
+<VirtualHost *:80>
+    ServerName example.com
+    ServerAlias www.example.com
+    Redirect permanent / https://example.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName example.com
+    ServerAlias www.example.com
+    
+    SSLEngine on
+    SSLCertificateFile /path/to/fullchain.pem
+    SSLCertificateKeyFile /path/to/privkey.pem
+    
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:8080/
+    ProxyPassReverse / http://127.0.0.1:8080/
+
+    # Proxy WebSocket connections if needed
+    ProxyPass /ws ws://127.0.0.1:8080/ws
+    ProxyPassReverse /ws ws://127.0.0.1:8080/ws
+
+    # Proxy Prometheus metrics
+    ProxyPass /prometheus http://127.0.0.1:9093/
+    ProxyPassReverse /prometheus http://127.0.0.1:9093/
+
+    # Proxy Grafana
+    ProxyPass /grafana http://127.0.0.1:3000/
+    ProxyPassReverse /grafana http://127.0.0.1:3000/
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost> 

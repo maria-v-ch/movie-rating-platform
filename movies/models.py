@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 import uuid
 from django.db.models import Avg
 from django.conf import settings
@@ -45,6 +45,20 @@ class Movie(models.Model):
         ]
         ordering = ['-release_year', '-average_rating']
 
+    @property
+    def poster_url(self):
+        """Return the URL for the movie poster."""
+        # Check for uploaded poster first
+        if self.poster and hasattr(self.poster, 'url'):
+            return self.poster.url
+            
+        # Then check for static poster using the poster filename from the fixture
+        if self.poster:
+            return f'/media/posters/{self.poster}'
+            
+        # Fallback to default poster
+        return '/static/movies/posters/default.jpg'
+
     def clean(self):
         super().clean()
         if self.release_year and self.release_year < 1888:
@@ -71,12 +85,13 @@ class Movie(models.Model):
         ratings = self.ratings.all()
         if ratings:
             avg_rating = ratings.aggregate(Avg('score'))['score__avg']
-            self.average_rating = round(Decimal(avg_rating), 2)
+            avg_decimal = Decimal(str(avg_rating)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            self.average_rating = avg_decimal
             self.total_ratings = ratings.count()
         else:
-            self.average_rating = Decimal('0.0')
+            self.average_rating = Decimal('0.00')
             self.total_ratings = 0
-        self.save()
+        self.save(update_fields=['average_rating', 'total_ratings'])
 
     @property
     def year(self):

@@ -15,10 +15,15 @@
                                 {{ director.movie_count }} movie{{ director.movie_count|pluralize }}
                             </small>
                         </p>
-                        {% if director.avg_rating %}
+                        {% if director.rated_count > 0 %}
                             <p class="card-text">
                                 Average Rating: {{ director.avg_rating|floatformat:1 }}
                                 <i class="fas fa-star text-warning"></i>
+                                <small class="text-muted">({{ director.rated_count }} rating{{ director.rated_count|pluralize }})</small>
+                            </p>
+                        {% else %}
+                            <p class="card-text text-muted">
+                                No ratings yet
                             </p>
                         {% endif %}
                     </div>

@@ -39,7 +39,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email']
+        fields = ['email', 'bio', 'profile_image']
+        read_only_fields = ['username']
 
     def validate_email(self, value):
         user = self.context['request'].user

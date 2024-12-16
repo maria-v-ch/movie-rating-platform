@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py test
+      "
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=ci_test_key
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+      - CSRF_COOKIE_SECURE=False
+      - CSRF_COOKIE_HTTPONLY=False
+      - CSRF_USE_SESSIONS=False
+      - CSRF_COOKIE_SAMESITE=Lax
+      - DB_NAME=movies_test
+      - DB_USER=movies_test
+      - DB_PASSWORD=movies_test
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DJANGO_SETTINGS_MODULE=config.test_settings
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=movies_test
+      - POSTGRES_USER=movies_test
+      - POSTGRES_PASSWORD=movies_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U movies_test -d movies_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 

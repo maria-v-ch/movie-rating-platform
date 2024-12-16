@@ -1,5 +1,5 @@
 from django.views.generic import ListView, DetailView
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Avg
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
@@ -33,28 +33,48 @@ class MovieListView(ListView):
 
     def get_queryset(self):
         queryset = Movie.objects.all()
-        search = self.request.GET.get('search')
-        movement = self.request.GET.get('movement')
+        
+        # Filter by director if specified
         director = self.request.GET.get('director')
-        sort = self.request.GET.get('sort', '-release_year')
-
-        if search:
-            queryset = queryset.filter(
-                Q(title__icontains=search) |
-                Q(director__icontains=search) |
-                Q(description__icontains=search)
-            )
-        if movement:
-            queryset = queryset.filter(movement=movement)
         if director:
             queryset = queryset.filter(director=director)
-
-        return queryset.order_by(sort)
+        
+        # Filter by movement if specified
+        movement = self.request.GET.get('movement')
+        if movement:
+            queryset = queryset.filter(movement=movement)
+        
+        # Filter by year if specified
+        year = self.request.GET.get('year')
+        if year:
+            queryset = queryset.filter(release_year=year)
+        
+        return queryset.order_by('-release_year', '-average_rating')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['movements'] = Movie.objects.values('movement').distinct()
-        context['directors'] = Movie.objects.values('director').distinct()
+        # Get unique directors with their movie counts
+        context['directors'] = (Movie.objects.values('director')
+                              .annotate(movie_count=Count('id'))
+                              .order_by('director')
+                              .distinct())
+        
+        # Get unique movements with their movie counts
+        context['movements'] = (Movie.objects.values('movement')
+                              .annotate(movie_count=Count('id'))
+                              .order_by('movement')
+                              .distinct())
+        
+        # Get unique years
+        context['years'] = (Movie.objects.values_list('release_year', flat=True)
+                          .order_by('-release_year')
+                          .distinct())
+        
+        # Get current filters
+        context['current_director'] = self.request.GET.get('director', '')
+        context['current_movement'] = self.request.GET.get('movement', '')
+        context['current_year'] = self.request.GET.get('year', '')
+        
         return context
 
 class MovieDetailView(DetailView):
@@ -66,31 +86,59 @@ class MovieDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         movie = self.get_object()
+        
+        # Get reviews with related user and rating data
+        reviews = movie.reviews.select_related('user').prefetch_related(
+            'user__ratings'
+        ).order_by('-created_at')[:5]
+        
+        # Create a dictionary of user ratings for this movie
+        user_ratings = {}
+        for review in reviews:
+            rating = review.user.ratings.filter(movie=movie).first()
+            if rating:
+                user_ratings[review.user.id] = rating
+        
+        context['reviews'] = reviews
+        context['user_ratings'] = user_ratings
         context['similar_movies'] = Movie.objects.filter(
             Q(director=movie.director) | Q(movement=movie.movement)
         ).exclude(id=movie.id)[:4]
-        context['reviews'] = movie.reviews.select_related('user').order_by('-created_at')[:5]
+        
+        # Add user's review and rating if authenticated
+        if self.request.user.is_authenticated:
+            context['user_review'] = movie.reviews.filter(user=self.request.user).first()
+            context['user_rating'] = movie.ratings.filter(user=self.request.user).first()
+        
         return context
 
 class DirectorListView(ListView):
-    model = Movie
     template_name = 'movies/director_list.html'
     context_object_name = 'directors'
 
     def get_queryset(self):
-        return Movie.objects.values('director').annotate(
-            movie_count=Count('id')
-        ).order_by('director')
+        return (Movie.objects.values('director')
+                .annotate(
+                    movie_count=Count('id'),
+                    rated_count=Count('ratings'),
+                    avg_rating=Avg('ratings__score')
+                )
+                .order_by('director')
+                .distinct())
 
 class MovementListView(ListView):
-    model = Movie
     template_name = 'movies/movement_list.html'
     context_object_name = 'movements'
 
     def get_queryset(self):
-        return Movie.objects.values('movement').annotate(
-            movie_count=Count('id')
-        ).order_by('movement')
+        return (Movie.objects.values('movement')
+                .annotate(
+                    movie_count=Count('id'),
+                    rated_count=Count('ratings'),
+                    avg_rating=Avg('ratings__score')
+                )
+                .order_by('movement')
+                .distinct())
 
 # API Views
 class MovieViewSet(viewsets.ModelViewSet):

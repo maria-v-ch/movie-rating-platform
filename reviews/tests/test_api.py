@@ -36,11 +36,16 @@ class ReviewTests(TestCase):
             movement='Italian Neorealism'
         )
         
-        # Create a review
+        # Create a review and rating separately
         self.review = Review.objects.create(
             movie=self.movie,
             user=self.user,
             text='A masterpiece of cinema.'
+        )
+        self.rating = Rating.objects.create(
+            movie=self.movie,
+            user=self.user,
+            score=Decimal('4.5')
         )
 
     def test_create_review_authenticated(self):
@@ -49,18 +54,28 @@ class ReviewTests(TestCase):
         url = reverse('reviews:review-list')
         data = {
             'movie_id': self.movie.id,
-            'text': 'An excellent film.'
+            'text': 'An excellent film.',
+            'score': '4.5'
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Review.objects.count(), 2)
+        
+        # Verify review was created
+        new_review = Review.objects.get(user=self.user2)
+        self.assertEqual(new_review.text, 'An excellent film.')
+        
+        # Verify rating was created separately
+        new_rating = Rating.objects.get(user=self.user2, movie=self.movie)
+        self.assertEqual(new_rating.score, Decimal('4.5'))
 
     def test_create_review_unauthenticated(self):
         """Test creating a review when unauthenticated fails"""
         url = reverse('reviews:review-list')
         data = {
             'movie_id': self.movie.id,
-            'text': 'An excellent film.'
+            'text': 'An excellent film.',
+            'score': '4.5'
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -71,7 +86,8 @@ class ReviewTests(TestCase):
         url = reverse('reviews:review-list')
         data = {
             'movie_id': self.movie.id,
-            'text': 'Another review.'
+            'text': 'Another review.',
+            'score': '4.0'
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -82,30 +98,47 @@ class ReviewTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
+        # Verify basic review data
+        self.assertEqual(response.data['results'][0]['text'], 'A masterpiece of cinema.')
+        self.assertEqual(response.data['results'][0]['user'], self.user.username)
+        self.assertEqual(response.data['results'][0]['movie']['id'], self.movie.id)
+        self.assertEqual(response.data['results'][0]['rating_score'], '4.5')
 
     def test_filter_reviews_by_movie(self):
         """Test filtering reviews by movie"""
-        url = reverse('reviews:review-list') + f'?movie_id={self.movie.id}'
+        url = reverse('reviews:review-list') + f'?movie={self.movie.id}'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['movie']['id'], self.movie.id)
 
     def test_filter_reviews_by_user(self):
         """Test filtering reviews by user"""
-        url = reverse('reviews:review-list') + f'?user_id={self.user.id}'
+        url = reverse('reviews:review-list') + f'?user={self.user.id}'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['user'], self.user.username)
 
     def test_update_review(self):
         """Test updating a review"""
         self.client.force_authenticate(user=self.user)
         url = reverse('reviews:review-detail', args=[self.review.id])
-        data = {'text': 'Updated review text'}
+        data = {
+            'text': 'Updated review text',
+            'score': '4.0'
+        }
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify review text was updated
         self.review.refresh_from_db()
         self.assertEqual(self.review.text, 'Updated review text')
+        
+        # Verify rating was updated separately
+        self.rating.refresh_from_db()
+        self.assertEqual(self.rating.score, Decimal('4.0'))
+        self.assertEqual(response.data['rating_score'], '4.0')
 
     def test_delete_review(self):
         """Test deleting a review"""

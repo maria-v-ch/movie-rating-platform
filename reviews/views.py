@@ -7,6 +7,8 @@ from movies.models import Movie
 from rest_framework import serializers
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from decimal import Decimal, ROUND_HALF_UP
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
@@ -25,14 +27,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at']
     ordering = ['-created_at']
 
     def get_queryset(self):
         queryset = Review.objects.select_related('user', 'movie')
-        movie_id = self.request.query_params.get('movie_id')
-        user_id = self.request.query_params.get('user_id')
+        movie_id = self.request.query_params.get('movie')
+        user_id = self.request.query_params.get('user')
         
         if movie_id:
             queryset = queryset.filter(movie_id=movie_id)
@@ -42,11 +45,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        movie = get_object_or_404(Movie, id=serializer.validated_data['movie_id'])
+        # Get movie_id from either JSON or form data
+        movie_id = self.request.data.get('movie_id')
+        if not movie_id:
+            raise serializers.ValidationError({'movie_id': 'This field is required.'})
+            
+        movie = get_object_or_404(Movie, id=movie_id)
+        
         # Check if user already reviewed this movie
         if Review.objects.filter(movie=movie, user=self.request.user).exists():
             raise serializers.ValidationError({'detail': 'You have already reviewed this movie.'})
-        serializer.save(movie=movie, user=self.request.user)
+            
+        # Save the review with the user and movie
+        serializer.save(user=self.request.user, movie=movie)
 
     def check_object_permissions(self, request, obj):
         """Explicitly check object permissions"""
@@ -83,6 +94,7 @@ class RatingViewSet(viewsets.ModelViewSet):
             defaults={'score': serializer.validated_data['score']}
         )
         movie.update_rating()
+        serializer.instance = rating  # Set the instance so it's included in the response
         return rating
 
     def perform_destroy(self, instance):

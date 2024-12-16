@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=dev_secret_key
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+      - CSRF_COOKIE_SECURE=False
+      - CSRF_COOKIE_HTTPONLY=False
+      - CSRF_USE_SESSIONS=False
+      - CSRF_COOKIE_SAMESITE=Lax
+      - DB_NAME=movies_dev
+      - DB_USER=movies_user
+      - DB_PASSWORD=movies_password
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=movies_dev
+      - POSTGRES_USER=movies_user
+      - POSTGRES_PASSWORD=movies_password
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U movies_user -d movies_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data_dev: 

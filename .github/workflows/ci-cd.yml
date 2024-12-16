@@ -7,65 +7,208 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_DB: movie_rating_db
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
+    
+    env:
+      DEBUG: 'False'
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,paragoni.space,www.paragoni.space
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgrespassword
+      DB_HOST: db
+      DB_PORT: 5432
+      DATABASE_URL: postgres://postgres:postgrespassword@db:5432/postgres
+    
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
     
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
-        
+        python-version: '3.10'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc libpq-dev python3-dev
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
-    - name: Run tests
-      env:
-        DEBUG: "True"
-        SECRET_KEY: "test-key"
-        ALLOWED_HOSTS: "localhost,127.0.0.1"
-        DB_NAME: "movie_rating_db"
-        DB_USER: "postgres"
-        DB_PASSWORD: "postgres"
-        DB_HOST: "localhost"
-        DB_PORT: "5432"
+    
+    - name: Set up Docker Compose
       run: |
-        python manage.py test
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version
+    
+    - name: Run tests
+      run: |
+        docker-compose -f docker-compose.yml up -d db
+        docker-compose -f docker-compose.yml run --rm web python manage.py test
+      env:
+        DEBUG: 'False'
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,paragoni.space,www.paragoni.space
+        DB_NAME: postgres
+        DB_USER: postgres
+        DB_PASSWORD: postgrespassword
+        DB_HOST: db
+        DB_PORT: 5432
+        DATABASE_URL: postgres://postgres:postgrespassword@db:5432/postgres
 
   deploy:
-    needs: test
+    needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
     steps:
     - name: Deploy to server
       uses: appleboy/ssh-action@master
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: db
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DJANGO_SUPERUSER_USERNAME: ${{ secrets.DJANGO_SUPERUSER_USERNAME }}
+        DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+        DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+        GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       with:
-        host: paragoni.space
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        envs: SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST,DB_PORT,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD,GRAFANA_ADMIN_PASSWORD,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
         script: |
-          cd /var/www/movie_rating_platform
+          set -e
+          echo "Starting deployment process..."
+          
+          # Navigate to project directory
+          cd /home/${{ secrets.SERVER_USERNAME }}/movie_rating_platform
+          echo "Current directory: $(pwd)"
+
+          # Pull latest changes
           git pull origin main
-          docker-compose -f docker-compose.yml down
-          docker-compose -f docker-compose.yml up -d --build
-          docker-compose exec -T web python manage.py migrate
-          docker-compose exec -T web python manage.py collectstatic --noinput
+
+          # Create logs directory and set permissions
+          mkdir -p logs
+          chmod 777 logs
+          echo "Created logs directory with appropriate permissions"
+
+          # Install and configure Apache
+          if ! command -v apache2 &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y apache2
+          fi
+
+          # Enable required Apache modules
+          sudo a2enmod proxy
+          sudo a2enmod proxy_http
+          sudo a2enmod ssl
+          sudo a2enmod rewrite
+
+          # Copy Apache configuration
+          sudo cp paragoni.space.conf /etc/apache2/sites-available/
+          sudo a2ensite paragoni.space.conf
+
+          # Install certbot if not present
+          if ! command -v certbot &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y certbot python3-certbot-apache
+          fi
+
+          # Ensure SSL certificates are in place (using Apache plugin)
+          sudo certbot --apache -d paragoni.space -d www.paragoni.space --non-interactive --agree-tos -m m.chuvtaeva@gmail.com
+
+          # Reload Apache
+          sudo systemctl reload apache2
+
+          # Create .env file with environment variables
+          cat << EOF > .env
+          DEBUG=False
+          SECRET_KEY="${SECRET_KEY}"
+          ALLOWED_HOSTS=paragoni.space,www.paragoni.space
+          CSRF_TRUSTED_ORIGINS=https://paragoni.space,https://www.paragoni.space
+          CSRF_COOKIE_SECURE=True
+          CSRF_COOKIE_HTTPONLY=False
+          CSRF_USE_SESSIONS=False
+          CSRF_COOKIE_SAMESITE=Lax
+          DB_NAME="${DB_NAME}"
+          DB_USER="${DB_USER}"
+          DB_PASSWORD="${DB_PASSWORD}"
+          DB_HOST=db
+          DB_PORT="${DB_PORT}"
+          DJANGO_SUPERUSER_USERNAME="${DJANGO_SUPERUSER_USERNAME}"
+          DJANGO_SUPERUSER_EMAIL="${DJANGO_SUPERUSER_EMAIL}"
+          DJANGO_SUPERUSER_PASSWORD="${DJANGO_SUPERUSER_PASSWORD}"
+          GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD}"
+          EOF
+
+          echo "Created .env file"
+
+          # Login to Docker Hub
+          echo "${DOCKERHUB_TOKEN}" | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
+
+          # Stop and remove existing containers
+          echo "Stopping and removing existing containers..."
+          sudo docker-compose down -v
+
+          # Pull the latest images
+          sudo docker-compose pull
+
+          # Build and start the services
+          sudo docker-compose up -d --build
+
+          # Wait for database to be ready
+          echo "Waiting for database..."
+          for i in {1..30}; do
+            if sudo docker-compose exec -T db pg_isready -U ${DB_USER} -d ${DB_NAME}; then
+              echo "Database is ready!"
+              break
+            fi
+            echo "Waiting for database... (Attempt $i/30)"
+            sleep 10
+          done
+
+          # Run migrations
+          echo "Running migrations..."
+          sudo docker-compose exec -T web python manage.py migrate
+
+          # Collect static files
+          echo "Collecting static files..."
+          sudo docker-compose exec -T web python manage.py collectstatic --noinput
+
+          # Load initial data
+          echo "Loading initial data..."
+          sudo docker-compose exec -T web python manage.py loaddata movies/fixtures/initial_movies.json || true
+
+          # Create superuser (will not fail if exists)
+          echo "Ensuring superuser exists..."
+          sudo docker-compose exec -T web python manage.py createsuperuser --noinput || true
+
+          # Verify Nginx configuration
+          echo "Verifying Nginx configuration..."
+          sudo docker-compose exec -T nginx nginx -t
+
+          # Check container status
+          echo "Checking container status..."
+          sudo docker-compose ps
+
+          echo "Deployment completed successfully!"
+
+    - name: Build and push Docker images
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      run: |
+        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        docker-compose build
+        docker-compose push

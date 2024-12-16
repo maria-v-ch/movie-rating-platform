@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}My Favorites - Art House Cinema{% endblock %}
 
@@ -7,20 +8,29 @@
     <h1 class="mb-4">My Favorite Movies</h1>
     
     {% if favorite_movies %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for movie in favorite_movies %}
                 <div class="col">
                     <div class="card h-100 movie-card">
-                        {% if movie.poster_url %}
+                        <div class="card-img-wrapper">
                             <img src="{{ movie.poster_url }}" class="card-img-top" alt="{{ movie.title }}">
-                        {% endif %}
+                        </div>
                         <div class="card-body">
                             <h5 class="card-title">{{ movie.title }}</h5>
                             <p class="card-text">
-                                <small class="text-muted">{{ movie.director }}</small>
+                                <small class="text-muted">{{ movie.director }} ({{ movie.release_year }})</small>
                             </p>
-                            <p class="card-text">{{ movie.description|truncatewords:30 }}</p>
-                            <a href="{% url 'movies:movie-detail' movie.pk %}" class="btn btn-primary">View Details</a>
+                            <p class="card-text">
+                                <span class="rating">
+                                    {% if movie.average_rating > 0 %}
+                                        {{ movie.average_rating|floatformat:1 }}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        No ratings yet
+                                    {% endif %}
+                                </span>
+                            </p>
+                            <a href="{% url 'movies:movie-detail' movie.slug %}" class="btn btn-primary">View Details</a>
                         </div>
                     </div>
                 </div>

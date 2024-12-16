@@ -1,0 +1,482 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Found 74 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: corsheaders, django_filters, drf_yasg, messages, rest_framework, rest_framework_simplejwt, staticfiles
+  Apply all migrations: admin, auth, contenttypes, movies, reviews, sessions, users
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying movies.0001_initial... OK
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying users.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying movies.0002_initial... OK
+  Applying reviews.0001_initial... OK
+  Applying reviews.0002_initial... OK
+  Applying reviews.0003_alter_rating_score... OK
+  Applying sessions.0001_initial... OK
+  Applying users.0002_user_bio_user_profile_image... OK
+  Applying users.0003_alter_userfavoritemovie_movie_and_more... OK
+System check identified no issues (0 silenced).
+test_slug_generation (movies.tests.test_models.MovieModelTests.test_slug_generation)
+Test that slugs are generated correctly ... ok
+test_str_representation (movies.tests.test_models.MovieModelTests.test_str_representation)
+Test the string representation of the Movie model ... ok
+test_update_rating_with_no_ratings (movies.tests.test_models.MovieModelTests.test_update_rating_with_no_ratings)
+Test updating rating when there are no ratings ... ok
+test_update_rating_with_ratings (movies.tests.test_models.MovieModelTests.test_update_rating_with_ratings)
+Test updating rating with actual ratings ... ok
+test_validation_release_year (movies.tests.test_models.MovieModelTests.test_validation_release_year)
+Test release year validation ... ok
+test_validation_runtime (movies.tests.test_models.MovieModelTests.test_validation_runtime)
+Test runtime validation ... ok
+test_year_property (movies.tests.test_models.MovieModelTests.test_year_property)
+Test the year property returns release_year ... ok
+test_create_movie (movies.tests.test_api.MovieAPITests.test_create_movie)
+Test creating a new movie ... ok
+test_create_movie_with_html (movies.tests.test_api.MovieAPITests.test_create_movie_with_html)
+Test creating a movie with HTML in title and description ... FAIL
+test_delete_movie (movies.tests.test_api.MovieAPITests.test_delete_movie)
+Test deleting a movie ... ok
+test_favorite_movie (movies.tests.test_api.MovieAPITests.test_favorite_movie)
+Test favoriting and unfavoriting a movie ... FAIL
+test_filter_movies (movies.tests.test_api.MovieAPITests.test_filter_movies)
+Test filtering movies by various criteria ... ok
+test_get_movie_detail (movies.tests.test_api.MovieAPITests.test_get_movie_detail)
+Test retrieving a specific movie ... ok
+test_get_movies_list (movies.tests.test_api.MovieAPITests.test_get_movies_list)
+Test retrieving a list of movies ... ok
+test_order_movies (movies.tests.test_api.MovieAPITests.test_order_movies)
+Test ordering movies ... ok
+test_search_movies (movies.tests.test_api.MovieAPITests.test_search_movies)
+Test searching movies ... ok
+test_unauthorized_create (movies.tests.test_api.MovieAPITests.test_unauthorized_create)
+Test that unauthorized users cannot create movies ... ok
+test_unauthorized_delete (movies.tests.test_api.MovieAPITests.test_unauthorized_delete)
+Test that unauthorized users cannot delete movies ... ok
+test_unauthorized_update (movies.tests.test_api.MovieAPITests.test_unauthorized_update)
+Test that unauthorized users cannot update movies ... ok
+test_update_movie (movies.tests.test_api.MovieAPITests.test_update_movie)
+Test updating a movie ... ok
+test_update_movie_with_html (movies.tests.test_api.MovieAPITests.test_update_movie_with_html)
+Test updating a movie with HTML in title and description ... FAIL
+test_director_list_view_get_queryset (movies.tests.test_views.MovieViewTests.test_director_list_view_get_queryset)
+Test DirectorListView's get_queryset method ... ok
+test_is_admin_or_readonly_permission (movies.tests.test_views.MovieViewTests.test_is_admin_or_readonly_permission)
+Test IsAdminOrReadOnly permission class ... ok
+test_movement_list_view_get_queryset (movies.tests.test_views.MovieViewTests.test_movement_list_view_get_queryset)
+Test MovementListView's get_queryset method ... ok
+test_movie_detail_view_get_context_data (movies.tests.test_views.MovieViewTests.test_movie_detail_view_get_context_data)
+Test MovieDetailView's get_context_data method ... ERROR
+test_movie_detail_view_unauthenticated (movies.tests.test_views.MovieViewTests.test_movie_detail_view_unauthenticated)
+Test MovieDetailView with unauthenticated user ... ERROR
+test_movie_filter_case_insensitive (movies.tests.test_views.MovieViewTests.test_movie_filter_case_insensitive)
+Test MovieFilter case insensitivity ... ok
+test_movie_filter_exact_matches (movies.tests.test_views.MovieViewTests.test_movie_filter_exact_matches)
+Test MovieFilter with exact matches ... ok
+test_movie_filter_no_matches (movies.tests.test_views.MovieViewTests.test_movie_filter_no_matches)
+Test MovieFilter with no matches ... ok
+test_movie_list_view_get_context_data (movies.tests.test_views.MovieViewTests.test_movie_list_view_get_context_data)
+Test MovieListView's get_context_data method ... ERROR
+test_movie_list_view_get_queryset (movies.tests.test_views.MovieViewTests.test_movie_list_view_get_queryset)
+Test MovieListView's get_queryset method with various filters ... ok
+test_movie_list_view_pagination (movies.tests.test_views.MovieViewTests.test_movie_list_view_pagination)
+Test MovieListView pagination ... ok
+test_movie_list_view_with_filters (movies.tests.test_views.MovieViewTests.test_movie_list_view_with_filters)
+Test MovieListView with active filters ... ok
+test_director_list_view_get_queryset (movies.tests.test_view_internals.ViewInternalsTests.test_director_list_view_get_queryset)
+Test DirectorListView's get_queryset method ... ok
+test_is_admin_or_readonly_permission (movies.tests.test_view_internals.ViewInternalsTests.test_is_admin_or_readonly_permission)
+Test IsAdminOrReadOnly permission class ... ok
+test_movement_list_view_get_queryset (movies.tests.test_view_internals.ViewInternalsTests.test_movement_list_view_get_queryset)
+Test MovementListView's get_queryset method ... ok
+test_movie_detail_view_get_context_data (movies.tests.test_view_internals.ViewInternalsTests.test_movie_detail_view_get_context_data)
+Test MovieDetailView's get_context_data method ... ERROR
+test_movie_filter_case_insensitive (movies.tests.test_view_internals.ViewInternalsTests.test_movie_filter_case_insensitive)
+Test MovieFilter case insensitivity ... ok
+test_movie_filter_exact_matches (movies.tests.test_view_internals.ViewInternalsTests.test_movie_filter_exact_matches)
+Test MovieFilter with exact matches ... ok
+test_movie_filter_no_matches (movies.tests.test_view_internals.ViewInternalsTests.test_movie_filter_no_matches)
+Test MovieFilter with no matches ... ok
+test_movie_list_view_get_context_data (movies.tests.test_view_internals.ViewInternalsTests.test_movie_list_view_get_context_data)
+Test MovieListView's get_context_data method ... ERROR
+test_movie_list_view_get_queryset (movies.tests.test_view_internals.ViewInternalsTests.test_movie_list_view_get_queryset)
+Test MovieListView's get_queryset method with various filters ... ok
+test_csrf_protection_on_login (movies.tests.test_security.SecurityTests.test_csrf_protection_on_login)
+Test that login requires CSRF token ... ok
+test_csrf_protection_on_registration (movies.tests.test_security.SecurityTests.test_csrf_protection_on_registration)
+Test that registration requires CSRF token ... ok
+test_xss_prevention (movies.tests.test_security.SecurityTests.test_xss_prevention)
+Test that XSS attempts are prevented ... ok
+test_api_list_performance (movies.tests.test_performance.PerformanceTests.test_api_list_performance) ... ERROR
+test_cache_effectiveness (movies.tests.test_performance.PerformanceTests.test_cache_effectiveness) ... FAIL
+test_database_query_optimization (movies.tests.test_performance.PerformanceTests.test_database_query_optimization) ... ERROR
+test_movie_detail_with_related_data (movies.tests.test_performance.PerformanceTests.test_movie_detail_with_related_data) ... ok
+test_movie_list_performance (movies.tests.test_performance.PerformanceTests.test_movie_list_performance) ... FAIL
+test_pagination_performance (movies.tests.test_performance.PerformanceTests.test_pagination_performance) ... ERROR
+test_related_data_loading_performance (movies.tests.test_performance.PerformanceTests.test_related_data_loading_performance) ... ERROR
+test_search_performance_with_complex_filters (movies.tests.test_performance.PerformanceTests.test_search_performance_with_complex_filters) ... ERROR
+test_create_rating_authenticated (reviews.tests.test_api.RatingTests.test_create_rating_authenticated)
+Test creating a rating when authenticated ... ok
+test_create_rating_unauthenticated (reviews.tests.test_api.RatingTests.test_create_rating_unauthenticated)
+Test creating a rating when unauthenticated fails ... ok
+test_delete_rating (reviews.tests.test_api.RatingTests.test_delete_rating)
+Test deleting a rating ... ok
+test_filter_ratings_by_movie (reviews.tests.test_api.RatingTests.test_filter_ratings_by_movie)
+Test filtering ratings by movie ... ok
+test_filter_ratings_by_user (reviews.tests.test_api.RatingTests.test_filter_ratings_by_user)
+Test filtering ratings by user ... ok
+test_invalid_decimal_places (reviews.tests.test_api.RatingTests.test_invalid_decimal_places)
+Test that ratings with too many decimal places are rejected ... ok
+test_invalid_rating_score (reviews.tests.test_api.RatingTests.test_invalid_rating_score)
+Test that invalid rating scores are rejected ... ok
+test_movie_average_rating_update (reviews.tests.test_api.RatingTests.test_movie_average_rating_update)
+Test that movie's average rating is updated ... ok
+test_negative_score (reviews.tests.test_api.RatingTests.test_negative_score)
+Test that negative scores are rejected ... ok
+test_non_numeric_score (reviews.tests.test_api.RatingTests.test_non_numeric_score)
+Test that non-numeric scores are rejected ... ok
+test_update_existing_rating (reviews.tests.test_api.RatingTests.test_update_existing_rating)
+Test updating an existing rating ... ok
+test_update_rating_via_patch (reviews.tests.test_api.RatingTests.test_update_rating_via_patch)
+Test updating a rating using PATCH ... ok
+test_create_review_authenticated (reviews.tests.test_api.ReviewTests.test_create_review_authenticated)
+Test creating a review when authenticated ... ok
+test_create_review_unauthenticated (reviews.tests.test_api.ReviewTests.test_create_review_unauthenticated)
+Test creating a review when unauthenticated fails ... ok
+test_delete_review (reviews.tests.test_api.ReviewTests.test_delete_review)
+Test deleting a review ... ok
+test_duplicate_review_fails (reviews.tests.test_api.ReviewTests.test_duplicate_review_fails)
+Test that a user cannot review the same movie twice ... ok
+test_filter_reviews_by_movie (reviews.tests.test_api.ReviewTests.test_filter_reviews_by_movie)
+Test filtering reviews by movie ... ok
+test_filter_reviews_by_user (reviews.tests.test_api.ReviewTests.test_filter_reviews_by_user)
+Test filtering reviews by user ... ok
+test_list_reviews (reviews.tests.test_api.ReviewTests.test_list_reviews)
+Test listing reviews ... ok
+test_update_other_user_review_fails (reviews.tests.test_api.ReviewTests.test_update_other_user_review_fails)
+Test that updating another user's review fails ... ok
+test_update_review (reviews.tests.test_api.ReviewTests.test_update_review)
+Test updating a review ... ok
+
+======================================================================
+ERROR: test_movie_detail_view_get_context_data (movies.tests.test_views.MovieViewTests.test_movie_detail_view_get_context_data)
+Test MovieDetailView's get_context_data method
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_views.py", line 142, in test_movie_detail_view_get_context_data
+    context = view.get_context_data()
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/movies/views.py", line 88, in get_context_data
+    movie = self.get_object()
+            ^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/views/generic/detail.py", line 34, in get_object
+    pk = self.kwargs.get(self.pk_url_kwarg)
+         ^^^^^^^^^^^
+AttributeError: 'MovieDetailView' object has no attribute 'kwargs'
+
+======================================================================
+ERROR: test_movie_detail_view_unauthenticated (movies.tests.test_views.MovieViewTests.test_movie_detail_view_unauthenticated)
+Test MovieDetailView with unauthenticated user
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_views.py", line 307, in test_movie_detail_view_unauthenticated
+    context = view.get_context_data()
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/movies/views.py", line 88, in get_context_data
+    movie = self.get_object()
+            ^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/views/generic/detail.py", line 34, in get_object
+    pk = self.kwargs.get(self.pk_url_kwarg)
+         ^^^^^^^^^^^
+AttributeError: 'MovieDetailView' object has no attribute 'kwargs'
+
+======================================================================
+ERROR: test_movie_list_view_get_context_data (movies.tests.test_views.MovieViewTests.test_movie_list_view_get_context_data)
+Test MovieListView's get_context_data method
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_views.py", line 95, in test_movie_list_view_get_context_data
+    context = view.get_context_data()
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/movies/views.py", line 55, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/views/generic/list.py", line 128, in get_context_data
+    paginator, page, queryset, is_paginated = self.paginate_queryset(
+                                              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/views/generic/list.py", line 62, in paginate_queryset
+    page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+           ^^^^^^^^^^^
+AttributeError: 'MovieListView' object has no attribute 'kwargs'
+
+======================================================================
+ERROR: test_movie_detail_view_get_context_data (movies.tests.test_view_internals.ViewInternalsTests.test_movie_detail_view_get_context_data)
+Test MovieDetailView's get_context_data method
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_view_internals.py", line 141, in test_movie_detail_view_get_context_data
+    context = view.get_context_data()
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/movies/views.py", line 88, in get_context_data
+    movie = self.get_object()
+            ^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/views/generic/detail.py", line 34, in get_object
+    pk = self.kwargs.get(self.pk_url_kwarg)
+         ^^^^^^^^^^^
+AttributeError: 'MovieDetailView' object has no attribute 'kwargs'
+
+======================================================================
+ERROR: test_movie_list_view_get_context_data (movies.tests.test_view_internals.ViewInternalsTests.test_movie_list_view_get_context_data)
+Test MovieListView's get_context_data method
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_view_internals.py", line 94, in test_movie_list_view_get_context_data
+    context = view.get_context_data()
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/movies/views.py", line 55, in get_context_data
+    context = super().get_context_data(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/views/generic/list.py", line 128, in get_context_data
+    paginator, page, queryset, is_paginated = self.paginate_queryset(
+                                              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/views/generic/list.py", line 62, in paginate_queryset
+    page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+           ^^^^^^^^^^^
+AttributeError: 'MovieListView' object has no attribute 'kwargs'
+
+======================================================================
+ERROR: test_api_list_performance (movies.tests.test_performance.PerformanceTests.test_api_list_performance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'movies-api'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_performance.py", line 51, in test_api_list_performance
+    url = reverse('movies-api:movie-list')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'movies-api' is not a registered namespace
+
+======================================================================
+ERROR: test_database_query_optimization (movies.tests.test_performance.PerformanceTests.test_database_query_optimization)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/backends/sqlite3/base.py", line 350, in execute
+    return super().execute(query)
+           ^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: pg_indexes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_performance.py", line 124, in test_database_query_optimization
+    cursor.execute("""
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/db/backends/sqlite3/base.py", line 350, in execute
+    return super().execute(query)
+           ^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such table: pg_indexes
+
+======================================================================
+ERROR: test_pagination_performance (movies.tests.test_performance.PerformanceTests.test_pagination_performance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'movies-api'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_performance.py", line 74, in test_pagination_performance
+    url = reverse('movies-api:movie-list')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'movies-api' is not a registered namespace
+
+======================================================================
+ERROR: test_related_data_loading_performance (movies.tests.test_performance.PerformanceTests.test_related_data_loading_performance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'movies-api'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_performance.py", line 114, in test_related_data_loading_performance
+    url = reverse('movies-api:movie-detail', kwargs={'slug': self.movies[0].slug})
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'movies-api' is not a registered namespace
+
+======================================================================
+ERROR: test_search_performance_with_complex_filters (movies.tests.test_performance.PerformanceTests.test_search_performance_with_complex_filters)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'movies-api'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_performance.py", line 96, in test_search_performance_with_complex_filters
+    url = reverse('movies-api:movie-list')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/alien/ofcourse/movie_rating_platform/venv/lib/python3.12/site-packages/django/urls/base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'movies-api' is not a registered namespace
+
+======================================================================
+FAIL: test_create_movie_with_html (movies.tests.test_api.MovieAPITests.test_create_movie_with_html)
+Test creating a movie with HTML in title and description
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_api.py", line 63, in test_create_movie_with_html
+    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+AssertionError: 400 != 201
+
+======================================================================
+FAIL: test_favorite_movie (movies.tests.test_api.MovieAPITests.test_favorite_movie)
+Test favoriting and unfavoriting a movie
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_api.py", line 91, in test_favorite_movie
+    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+AssertionError: 403 != 401
+
+======================================================================
+FAIL: test_update_movie_with_html (movies.tests.test_api.MovieAPITests.test_update_movie_with_html)
+Test updating a movie with HTML in title and description
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_api.py", line 78, in test_update_movie_with_html
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+AssertionError: 400 != 200
+
+======================================================================
+FAIL: test_cache_effectiveness (movies.tests.test_performance.PerformanceTests.test_cache_effectiveness)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_performance.py", line 71, in test_cache_effectiveness
+    self.assertLess(queries_second_request, queries_first_request)
+AssertionError: 5 not less than 5
+
+======================================================================
+FAIL: test_movie_list_performance (movies.tests.test_performance.PerformanceTests.test_movie_list_performance)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/alien/ofcourse/movie_rating_platform/movies/tests/test_performance.py", line 41, in test_movie_list_performance
+    self.assertLess(len(context.captured_queries), 5)  # Ensure efficient querying
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 5 not less than 5
+
+----------------------------------------------------------------------
+Ran 74 tests in 176.405s
+
+FAILED (failures=5, errors=10)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Name                                                              Stmts   Miss  Cover
+-------------------------------------------------------------------------------------
+config/__init__.py                                                    0      0   100%
+config/asgi.py                                                        4      4     0%
+config/settings.py                                                   55      1    98%
+config/test_settings.py                                              23      0   100%
+config/urls.py                                                        5      0   100%
+config/wsgi.py                                                        4      4     0%
+manage.py                                                            12      2    83%
+movies/admin.py                                                      11      0   100%
+movies/apps.py                                                        6      0   100%
+movies/migrations/0001_initial.py                                     6      0   100%
+movies/migrations/0002_initial.py                                     6      0   100%
+movies/migrations/__init__.py                                         0      0   100%
+movies/models.py                                                     67      3    96%
+movies/pagination.py                                                  8      0   100%
+movies/serializers.py                                                38      8    79%
+movies/signals.py                                                     0      0   100%
+movies/templatetags/__init__.py                                       0      0   100%
+movies/templatetags/movie_tags.py                                     5      1    80%
+movies/tests/__init__.py                                              0      0   100%
+movies/tests/test_api.py                                            117     15    87%
+movies/tests/test_models.py                                          42      0   100%
+movies/tests/test_performance.py                                     82     31    62%
+movies/tests/test_security.py                                        47      1    98%
+movies/tests/test_view_internals.py                                 126     26    79%
+movies/tests/test_views.py                                          163     34    79%
+movies/urls.py                                                        4      0   100%
+movies/urls_api.py                                                    8      0   100%
+movies/views.py                                                     114     24    79%
+movies/views_api.py                                                  61      9    85%
+reviews/__init__.py                                                   0      0   100%
+reviews/admin.py                                                     16      0   100%
+reviews/apps.py                                                       4      0   100%
+reviews/migrations/0001_initial.py                                    7      0   100%
+reviews/migrations/0002_initial.py                                    7      0   100%
+reviews/migrations/0003_alter_rating_score.py                         6      0   100%
+reviews/migrations/__init__.py                                        0      0   100%
+reviews/models.py                                                    31      2    94%
+reviews/serializers.py                                               79     15    81%
+reviews/tests/__init__.py                                             0      0   100%
+reviews/tests/test_api.py                                           170      0   100%
+reviews/urls.py                                                       8      0   100%
+reviews/views.py                                                     75      4    95%
+users/admin.py                                                       16      0   100%
+users/apps.py                                                         6      0   100%
+users/forms.py                                                       24      5    79%
+users/migrations/0001_initial.py                                     10      0   100%
+users/migrations/0002_user_bio_user_profile_image.py                  4      0   100%
+users/migrations/0003_alter_userfavoritemovie_movie_and_more.py       6      0   100%
+users/migrations/__init__.py                                          0      0   100%
+users/models.py                                                      32      4    88%
+users/serializers.py                                                 35     10    71%
+users/signals.py                                                      0      0   100%
+users/urls.py                                                         5      0   100%
+users/urls_api.py                                                     7      0   100%
+users/views.py                                                       92     32    65%
+-------------------------------------------------------------------------------------
+TOTAL                                                              1654    235    86%

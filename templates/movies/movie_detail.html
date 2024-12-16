@@ -1,173 +1,153 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load movie_tags %}
 
 {% block title %}{{ movie.title }} - Art House Cinema{% endblock %}
 
 {% block content %}
-<!-- Movie Header -->
-<div class="movie-detail-header" style="background-image: url('{{ movie.poster_url }}');">
-    <div class="movie-detail-overlay d-flex align-items-end">
-        <div class="container">
-            <div class="row">
+{% csrf_token %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Movie Info Section -->
+        <div class="container py-3">
+            <div class="row g-3">
+                <!-- Movie Poster -->
                 <div class="col-md-3">
-                    {% if movie.poster_url %}
-                        <img src="{{ movie.poster_url }}" class="img-fluid rounded" alt="{{ movie.title }}">
-                    {% else %}
-                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="height: 450px;">
-                            <i class="fas fa-film fa-3x text-light"></i>
-                        </div>
-                    {% endif %}
+                    <img src="{{ movie.poster_url }}" class="img-fluid rounded shadow" alt="{{ movie.title }}" onerror="this.src='/static/movies/posters/default.jpg'">
                 </div>
+                
+                <!-- Movie Info -->
                 <div class="col-md-9">
-                    <h1 class="display-4">{{ movie.title }} ({{ movie.release_year }})</h1>
-                    <p class="lead">Directed by {{ movie.director }}</p>
-                    <div class="mb-3">
-                        {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= average_rating %}
-                                <i class="fas fa-star rating-star fa-lg"></i>
-                            {% else %}
-                                <i class="far fa-star rating-star fa-lg"></i>
+                    <div class="d-flex flex-column h-100">
+                        <div class="mb-2">
+                            <h2 class="mb-1">{{ movie.title }}</h2>
+                            {% if movie.original_title %}
+                                <h5 class="text-muted mb-2">{{ movie.original_title }}</h5>
                             {% endif %}
-                        {% endfor %}
-                        <span class="ms-2 fs-4">({{ movie.total_ratings }} reviews)</span>
-                        {% if average_rating %}
-                            <span class="ms-2 fs-4">{{ average_rating|floatformat:1 }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="d-flex gap-3">
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-2">
+                                {% with rating_int=movie.average_rating|floatformat:"0"|add:"0" %}
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= rating_int %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <small class="text-muted">
+                                {{ movie.average_rating|floatformat:1 }} 
+                                ({{ movie.total_ratings }} rating{{ movie.total_ratings|pluralize }})
+                            </small>
+                        </div>
+
+                        <div class="row row-cols-2 g-2 mb-3">
+                            <div class="col">
+                                <small><strong>Director:</strong> {{ movie.director }}</small>
+                            </div>
+                            <div class="col">
+                                <small><strong>Release Year:</strong> {{ movie.release_year }}</small>
+                            </div>
+                            <div class="col">
+                                <small><strong>Country:</strong> {{ movie.country }}</small>
+                            </div>
+                            <div class="col">
+                                <small><strong>Movement:</strong> {{ movie.movement }}</small>
+                            </div>
+                            <div class="col">
+                                <small><strong>Runtime:</strong> {{ movie.runtime }} minutes</small>
+                            </div>
+                            <div class="col">
+                                <small><strong>Cinematographer:</strong> {{ movie.cinematographer }}</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <p class="movie-description small mb-2">{{ movie.description }}</p>
+                        </div>
+
                         {% if user.is_authenticated %}
-                            <button class="btn btn-outline-light favorite-btn" data-movie-id="{{ movie.slug }}">
-                                <i class="{% if movie in user.favorite_movies.all %}fas{% else %}far{% endif %} fa-heart"></i>
-                                {% if movie in user.favorite_movies.all %}Remove from{% else %}Add to{% endif %} Favorites
-                            </button>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
-                                Write a Review
-                            </button>
+                            {% if user_review %}
+                                <div class="alert alert-info py-2 mb-0">
+                                    <h6 class="mb-1">Your Review</h6>
+                                    <div class="mb-1">
+                                        {% if user_rating %}
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= user_rating.score %}
+                                                    <i class="fas fa-star text-warning"></i>
+                                                {% else %}
+                                                    <i class="far fa-star text-warning"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    <p class="small mb-1">{{ user_review.text }}</p>
+                                    <small class="text-muted">Posted on {{ user_review.created_at|date:"F j, Y" }}</small>
+                                </div>
+                            {% else %}
+                                <div class="d-flex gap-2 mt-auto">
+                                    <button class="btn btn-outline-primary btn-sm favorite-btn" data-movie-id="{{ movie.id }}">
+                                        <i class="{% if movie in user.favorite_movies.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                        {% if movie in user.favorite_movies.all %}Remove from{% else %}Add to{% endif %} Favorites
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                        Write a Review
+                                    </button>
+                                </div>
+                            {% endif %}
                         {% else %}
-                            <a href="{% url 'users:login' %}" class="btn btn-primary">Login to Review</a>
+                            <div class="mt-auto">
+                                <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary btn-sm">
+                                    Login to Review
+                                </a>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Movie Details -->
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h3>About the Film</h3>
-                    <p class="lead">{{ movie.description }}</p>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>Movement</h5>
-                            <p>{{ movie.movement }}</p>
-                            <h5>Country</h5>
-                            <p>{{ movie.country }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>Runtime</h5>
-                            <p>{{ movie.runtime }} minutes</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reviews Section -->
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
             <h3 class="mb-4">Reviews</h3>
             {% for review in reviews %}
-            <div class="card review-card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">{{ review.user.username }}</h5>
-                        <div>
-                            {% for i in "12345"|make_list %}
-                                {% if forloop.counter <= review.score %}
-                                    <i class="fas fa-star rating-star"></i>
-                                {% else %}
-                                    <i class="far fa-star rating-star"></i>
+                <div class="card mb-3 {% if review.user == user %}border-primary{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">
+                                {{ review.user.username }}
+                                {% if review.user == user %}
+                                    <span class="badge bg-primary">Your Review</span>
                                 {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <p class="card-text">{{ review.text }}</p>
-                    <small class="text-muted">Posted on {{ review.created_at|date:"F j, Y" }}</small>
-                </div>
-            </div>
-            {% empty %}
-            <div class="alert alert-info">
-                No reviews yet. Be the first to review this movie!
-            </div>
-            {% endfor %}
-
-            <!-- Pagination for reviews -->
-            {% if reviews.is_paginated %}
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if reviews.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ reviews.previous_page_number }}">Previous</a>
-                        </li>
-                    {% endif %}
-
-                    {% for num in reviews.paginator.page_range %}
-                        {% if reviews.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > reviews.number|add:'-3' and num < reviews.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if reviews.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ reviews.next_page_number }}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4>Similar Movies</h4>
-                    {% for similar_movie in similar_movies %}
-                    <div class="d-flex mb-3">
-                        {% if similar_movie.poster_url %}
-                            <img src="{{ similar_movie.poster_url }}" class="rounded" alt="{{ similar_movie.title }}" style="width: 100px; height: 150px; object-fit: cover;">
-                        {% else %}
-                            <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="width: 100px; height: 150px;">
-                                <i class="fas fa-film text-light"></i>
-                            </div>
-                        {% endif %}
-                        <div class="ms-3">
-                            <h6><a href="{% url 'movies:movie-detail' similar_movie.slug %}" class="text-decoration-none">{{ similar_movie.title }}</a></h6>
-                            <p class="text-muted mb-1">{{ similar_movie.release_year }}</p>
+                            </h5>
                             <div>
-                                {% for i in "12345"|make_list %}
-                                    {% if forloop.counter <= similar_movie.average_rating %}
-                                        <i class="fas fa-star rating-star small"></i>
-                                    {% else %}
-                                        <i class="far fa-star rating-star small"></i>
+                                {% with rating=user_ratings|get_item:review.user.id %}
+                                    {% if rating %}
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= rating.score %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
                                     {% endif %}
-                                {% endfor %}
+                                {% endwith %}
                             </div>
                         </div>
+                        <p class="card-text">{{ review.text }}</p>
+                        <small class="text-muted">{{ review.created_at|date:"F j, Y" }}</small>
                     </div>
-                    {% empty %}
-                    <p class="text-muted">No similar movies found.</p>
-                    {% endfor %}
                 </div>
-            </div>
+            {% empty %}
+                <div class="alert alert-info">
+                    No reviews yet. Be the first to review this movie!
+                </div>
+            {% endfor %}
         </div>
     </div>
 </div>
@@ -182,150 +162,204 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="reviewForm">
+                <form id="reviewForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="movie_id" value="{{ movie.id }}">
                     <div class="mb-3">
                         <label class="form-label">Rating</label>
                         <div class="rating-input">
-                            {% for i in "12345"|make_list %}
-                            <input type="radio" name="rating" value="{{ forloop.counter }}" id="star{{ forloop.counter }}" required>
-                            <label for="star{{ forloop.counter }}">
-                                <i class="far fa-star rating-star"></i>
-                            </label>
-                            {% endfor %}
+                            <div class="star-rating">
+                                <input type="radio" name="score" value="5.0" id="star5" required>
+                                <label for="star5" title="5 stars">★</label>
+                                <input type="radio" name="score" value="4.0" id="star4" required>
+                                <label for="star4" title="4 stars">★</label>
+                                <input type="radio" name="score" value="3.0" id="star3" required>
+                                <label for="star3" title="3 stars">★</label>
+                                <input type="radio" name="score" value="2.0" id="star2" required>
+                                <label for="star2" title="2 stars">★</label>
+                                <input type="radio" name="score" value="1.0" id="star1" required>
+                                <label for="star1" title="1 star">★</label>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="comment" class="form-label">Your Review</label>
-                        <textarea class="form-control" id="comment" name="comment" rows="4" required></textarea>
+                        <label for="text" class="form-label">Your Review</label>
+                        <textarea class="form-control" id="text" name="text" rows="4" required></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
                     </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="submitReview">Submit Review</button>
             </div>
         </div>
     </div>
 </div>
-{% endif %}
 
-{% block extra_js %}
+<style>
+.star-rating {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    font-size: 1.5rem;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    color: #ddd;
+    cursor: pointer;
+    padding: 0 0.1em;
+    transition: color 0.2s ease-in-out;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+    color: #f1c40f;
+}
+
+.star-rating input:checked + label {
+    color: #f1c40f;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Favorite button functionality
-    const favoriteBtn = document.querySelector('.favorite-btn');
-    if (favoriteBtn) {
-        favoriteBtn.addEventListener('click', function() {
-            const movieSlug = this.dataset.movieId;
-            fetch(`/api/v1/movies/${movieSlug}/favorite/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const icon = this.querySelector('i');
-                icon.classList.toggle('fas');
-                icon.classList.toggle('far');
-                this.textContent = icon.classList.contains('fas') ? 'Remove from Favorites' : 'Add to Favorites';
-                this.prepend(icon);
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    }
-
-    // Review form functionality
+    // Review form handling
     const reviewForm = document.getElementById('reviewForm');
-    const submitReview = document.getElementById('submitReview');
-    const ratingInputs = document.querySelectorAll('.rating-input input');
-    const ratingLabels = document.querySelectorAll('.rating-input label i');
+    const modal = document.getElementById('reviewModal');
+    const bootstrapModal = bootstrap.Modal.getInstance(modal);
 
-    // Star rating hover effect
-    ratingInputs.forEach((input, index) => {
-        input.addEventListener('change', () => updateStars(index + 1));
-        input.addEventListener('mouseover', () => {
-            ratingLabels.forEach((label, i) => {
-                label.classList.remove('fas', 'far');
-                label.classList.add(i <= index ? 'fas' : 'far');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(reviewForm);
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key === 'score') {
+                    // Ensure score is sent as a string with one decimal place
+                    data[key] = parseFloat(value).toFixed(1);
+                } else {
+                    data[key] = value;
+                }
             });
-        });
-    });
 
-    document.querySelector('.rating-input').addEventListener('mouseout', () => {
-        const selectedRating = document.querySelector('.rating-input input:checked');
-        if (selectedRating) {
-            updateStars(selectedRating.value);
-        } else {
-            ratingLabels.forEach(label => {
-                label.classList.remove('fas');
-                label.classList.add('far');
-            });
-        }
-    });
+            console.log('Submitting data:', data);  // Debug log
 
-    function updateStars(rating) {
-        ratingLabels.forEach((label, index) => {
-            label.classList.remove('fas', 'far');
-            label.classList.add(index < rating ? 'fas' : 'far');
-        });
-    }
-
-    // Submit review
-    if (submitReview) {
-        submitReview.addEventListener('click', function() {
-            const rating = document.querySelector('input[name="rating"]:checked')?.value;
-            const comment = document.getElementById('comment').value;
-
-            if (!rating || !comment) {
-                alert('Please provide both a rating and a comment.');
-                return;
-            }
-
-            fetch(`/api/v1/movies/${movieSlug}/reviews/`, {
+            fetch('{% url "reviews:review-list" %}', {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                 },
-                body: JSON.stringify({
-                    rating: parseInt(rating),
-                    comment: comment
-                })
+                body: JSON.stringify(data)
             })
             .then(response => {
+                console.log('Response status:', response.status);  // Debug log
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(data => {
+                        console.error('Server response:', data);
+                        if (data.detail && data.detail.includes('already reviewed')) {
+                            location.reload();  // Refresh to show the existing review
+                            return;
+                        }
+                        throw new Error(JSON.stringify(data));
+                    });
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('Success:', data);
+                if (bootstrapModal) {
+                    bootstrapModal.hide();
+                }
                 location.reload();
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('There was an error submitting your review. Please try again.');
+                let errorMessage = 'Error submitting review. ';
+                try {
+                    const errorData = JSON.parse(error.message);
+                    console.error('Error data:', errorData);
+                    if (typeof errorData === 'object') {
+                        Object.entries(errorData).forEach(([key, value]) => {
+                            errorMessage += `${key}: ${value} `;
+                        });
+                    }
+                } catch (e) {
+                    console.error('Parse error:', e);
+                    errorMessage += 'Please try again.';
+                }
+                alert(errorMessage);
             });
         });
     }
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+    // Favorite button handling
+    const favoriteBtn = document.querySelector('.favorite-btn');
+    if (favoriteBtn) {
+        favoriteBtn.addEventListener('click', function() {
+            const movieId = this.dataset.movieId;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(`/api/v1/movies/${movieId}/favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => {
+                console.log('Response:', response);  // Debug log
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        console.error('Error response:', data);  // Debug log
+                        throw new Error(JSON.stringify(data));
+                    });
                 }
-            }
-        }
-        return cookieValue;
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success data:', data);  // Debug log
+                // Update the button appearance
+                const heartIcon = this.querySelector('i');
+                if (data.status === 'favorited') {
+                    heartIcon.classList.remove('far');
+                    heartIcon.classList.add('fas');
+                    this.innerHTML = `<i class="fas fa-heart"></i> Remove from Favorites`;
+                } else {
+                    heartIcon.classList.remove('fas');
+                    heartIcon.classList.add('far');
+                    this.innerHTML = `<i class="far fa-heart"></i> Add to Favorites`;
+                }
+            })
+            .catch(error => {
+                console.error('Error details:', error);  // Debug log
+                let errorMessage = 'Error updating favorites. ';
+                try {
+                    const errorData = JSON.parse(error.message);
+                    console.error('Parsed error data:', errorData);  // Debug log
+                    if (typeof errorData === 'object') {
+                        Object.entries(errorData).forEach(([key, value]) => {
+                            errorMessage += `${key}: ${value} `;
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error parsing error message:', e);  // Debug log
+                    errorMessage += 'Please try again.';
+                }
+                alert(errorMessage);
+            });
+        });
     }
 });
 </script>
-{% endblock %}
-
+{% endif %}
 {% endblock %} 
