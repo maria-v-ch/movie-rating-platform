@@ -24,19 +24,23 @@ wait_for_service "redis" "6379" "Redis"
 for dir in "/app/logs" "/app/media/posters" "/app/staticfiles"; do
     if [ ! -d "$dir" ]; then
         echo "Creating directory: $dir"
-        mkdir -p "$dir"
+        install -d -m 755 -o app_user -g app_user "$dir"
     fi
 done
 
+# Apply database migrations
 echo "Applying database migrations..."
 python manage.py migrate --noinput
 
+# Collect static files
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+# Load initial data
 echo "Loading initial data..."
-python manage.py loaddata initial_movies.json
+python manage.py loaddata initial_movies.json || true
 
+# Create superuser if needed
 echo "Creating superuser if needed..."
 python manage.py createsuperuser --noinput || true
 

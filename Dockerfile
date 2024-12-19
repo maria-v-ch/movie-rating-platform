@@ -48,10 +48,11 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir --find-links=/wheels -r requirements.txt && \
     pip install django-filter gunicorn
 
-# Create necessary directories with correct permissions
+# Create necessary directories and set permissions
 RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
     chown -R app_user:app_user /app && \
-    chmod -R 755 /app
+    chmod -R 755 /app && \
+    chmod g+s /app/logs /app/media/posters /app/staticfiles
 
 # Copy project files
 COPY --chown=app_user:app_user . .
