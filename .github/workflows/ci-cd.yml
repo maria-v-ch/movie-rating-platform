@@ -165,8 +165,21 @@ jobs:
           sudo a2enmod ssl
           sudo a2enmod rewrite
 
-          # Copy Apache configuration
-          sudo cp paragoni.space.conf.sample /etc/apache2/sites-available/paragoni.space.conf
+          # Create initial HTTP-only Apache configuration
+          cat << EOF | sudo tee /etc/apache2/sites-available/paragoni.space.conf
+          <VirtualHost *:80>
+              ServerName paragoni.space
+              ServerAlias www.paragoni.space
+              
+              ProxyPreserveHost On
+              ProxyPass / http://127.0.0.1:8080/
+              ProxyPassReverse / http://127.0.0.1:8080/
+              
+              ErrorLog \${APACHE_LOG_DIR}/paragoni.space-error.log
+              CustomLog \${APACHE_LOG_DIR}/paragoni.space-access.log combined
+          </VirtualHost>
+          EOF
+
           sudo a2ensite paragoni.space.conf
 
           # Install certbot if not present
