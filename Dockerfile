@@ -24,7 +24,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings
 
-# Create a non-root user
+# Create app user
 RUN useradd -m -U app_user && \
     mkdir -p /home/app_user
 
@@ -39,34 +39,29 @@ RUN apt-get update && \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy wheels from builder stage and install
+# Copy wheels and requirements from builder
 COPY --from=builder /app/wheels /wheels
 COPY --from=builder /app/requirements.txt .
+
+# Install Python packages
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir --find-links=/wheels -r requirements.txt && \
     pip install django-filter gunicorn
 
-# Copy project
-COPY . .
-
-# Create necessary directories with proper permissions
+# Create necessary directories with correct permissions
 RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
-    chmod 777 /app/media/posters /app/logs /app/staticfiles
+    chown -R app_user:app_user /app && \
+    chmod -R 755 /app
 
-# Copy posters with proper permissions
-RUN cp -r /app/movies/static/movies/posters/* /app/media/posters/ || true && \
-    chown -R app_user:app_user /app/media/posters || true
+# Copy project files
+COPY --chown=app_user:app_user . .
 
-# Copy entrypoint script and make it executable
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh && \
-    chown app_user:app_user /app/entrypoint.sh
+# Copy and set up entrypoint
+COPY --chown=app_user:app_user entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Switch to non-root user
+# Switch to app user
 USER app_user
 
-# Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
-
-# Default command
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"] 
