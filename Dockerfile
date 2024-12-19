@@ -36,6 +36,7 @@ RUN apt-get update && \
     wget \
     gcc \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy wheels from builder stage and install

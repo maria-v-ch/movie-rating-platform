@@ -19,9 +19,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.http import HttpResponse
+
+def health_check(request):
+    return HttpResponse("OK")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("health/", health_check, name='health_check'),
     path("", include("movies.urls")),
     path("users/", include("users.urls")),
     path("api/v1/", include("movies.urls_api")),
