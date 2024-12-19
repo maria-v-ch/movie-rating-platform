@@ -96,3 +96,9 @@ flake8_output.txt
 pylint_*.txt
 pylint_output.txt
 pylint_results.txt
+
+# Running results
+running_deploy_results
+running tests results
+*running_tests_results
+*running_deploy_results
