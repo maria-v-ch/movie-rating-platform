@@ -166,7 +166,7 @@ jobs:
           sudo a2enmod rewrite
 
           # Copy Apache configuration
-          sudo cp paragoni.space.conf /etc/apache2/sites-available/
+          sudo cp movie_rating_platform/paragoni.space.conf /etc/apache2/sites-available/
           sudo a2ensite paragoni.space.conf
 
           # Install certbot if not present
