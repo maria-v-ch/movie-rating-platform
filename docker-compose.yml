@@ -5,9 +5,9 @@ services:
     build: .
     command: gunicorn --bind 0.0.0.0:8000 config.wsgi:application
     volumes:
-      - .:/app
       - static_volume:/app/staticfiles
-      - ./logs:/app/logs
+      - media_volume:/app/media
+      - logs_volume:/app/logs
     expose:
       - 8000
     env_file:
@@ -60,34 +60,18 @@ services:
       - "8080:80"
       - "8443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf
-      - static_volume:/app/staticfiles
-      - /etc/letsencrypt:/etc/letsencrypt
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       web:
         condition: service_healthy
     networks:
       - app_network
-    environment:
-      - NGINX_ENTRYPOINT_QUIET_LOGS=0
-      - NGINX_DEBUG=1
-    command: >
-      /bin/bash -c "
-        echo 'Starting Nginx setup...' &&
-        echo 'Checking directory structure...' &&
-        ls -la /etc/nginx/conf.d/ &&
-        echo 'Checking configuration files...' &&
-        cat /etc/nginx/conf.d/default.conf &&
-        echo 'Verifying SSL configuration...' &&
-        ls -la /etc/letsencrypt/ || true &&
-        echo 'Testing Nginx configuration...' &&
-        nginx -t &&
-        echo 'Starting Nginx daemon...' &&
-        nginx -g 'daemon off;'
-      "
     healthcheck:
-      test: ["CMD", "nginx", "-t"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -111,7 +95,7 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
       - "9093:9090"
@@ -131,8 +115,8 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
@@ -149,6 +133,8 @@ networks:
 volumes:
   postgres_data:
   static_volume:
+  media_volume:
+  logs_volume:
   grafana_data:
   redis_data:
   prometheus_data:
