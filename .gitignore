@@ -90,3 +90,9 @@ docker-compose.override.yml
 
 # Server configuration
 paragoni.space.conf
+
+# Linting and type checking outputs
+flake8_output.txt
+pylint_*.txt
+pylint_output.txt
+pylint_results.txt

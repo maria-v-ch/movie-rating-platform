@@ -1,1 +1,1 @@
-# Signal handlers for users app 
+# Signal handlers for users app

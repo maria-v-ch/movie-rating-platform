@@ -1,0 +1,17 @@
+[flake8]
+max-line-length = 120
+exclude = 
+    .git,
+    __pycache__,
+    build,
+    dist,
+    *.pyc,
+    *.egg-info,
+    .eggs,
+    migrations,
+    venv
+extend-ignore = 
+    # E203: Whitespace before ':' (conflicts with black)
+    E203,
+    # E501: Line too long (handled by black)
+    E501 

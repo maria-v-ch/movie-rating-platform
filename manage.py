@@ -7,8 +7,8 @@ import sys
 def main():
     """Run administrative tasks."""
     # Use test settings when running tests
-    testing = 'test' in sys.argv
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.test_settings' if testing else 'config.settings')
+    testing = "test" in sys.argv
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.test_settings" if testing else "config.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -20,5 +20,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

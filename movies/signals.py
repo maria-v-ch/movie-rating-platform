@@ -1,1 +1,1 @@
-# Signal handlers for movies app 
+# Signal handlers for movies app
