@@ -166,7 +166,7 @@ jobs:
           sudo a2enmod rewrite
 
           # Copy Apache configuration
-          sudo cp paragoni.space.conf /etc/apache2/sites-available/
+          sudo cp paragoni.space.conf.sample /etc/apache2/sites-available/paragoni.space.conf
           sudo a2ensite paragoni.space.conf
 
           # Install certbot if not present
