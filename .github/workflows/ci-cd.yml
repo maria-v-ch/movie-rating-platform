@@ -70,6 +70,33 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
+    - name: Debug SSH Setup
+      run: |
+        echo "Setting up SSH debugging..."
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SERVER_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        echo "Known hosts file created"
+        ls -la ~/.ssh
+        cat ~/.ssh/known_hosts
+
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        known_hosts: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        if_key_exists: replace
+        config: |
+          Host paragoni.space
+            HostName paragoni.space
+            User ${{ secrets.SERVER_USERNAME }}
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking yes
+
+    - name: Verify SSH Connection
+      run: |
+        echo "Testing SSH connection..."
+        ssh -v -T ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
+
     - name: Deploy to server
       uses: appleboy/ssh-action@master
       env:
@@ -90,6 +117,8 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        debug: true
         envs: SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST,DB_PORT,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD,GRAFANA_ADMIN_PASSWORD,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,TEST_DB_PASSWORD
         script: |
           set -e
