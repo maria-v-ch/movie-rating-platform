@@ -15,9 +15,13 @@ services:
       - DB_PASSWORD=${TEST_DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     healthcheck:
       test: ["CMD", "python", "-c", "import socket; socket.socket().connect(('db', 5432))"]
       interval: 10s
@@ -32,6 +36,14 @@ services:
       - POSTGRES_PASSWORD=${TEST_DB_PASSWORD:-testpassword}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:6-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

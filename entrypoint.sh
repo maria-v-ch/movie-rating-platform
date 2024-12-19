@@ -8,6 +8,15 @@ done
 
 echo "PostgreSQL started"
 
+# Wait for Redis if REDIS_HOST is set
+if [ ! -z "$REDIS_HOST" ]; then
+  while ! nc -z $REDIS_HOST $REDIS_PORT; do
+    echo "Waiting for Redis..."
+    sleep 1
+  done
+  echo "Redis started"
+fi
+
 # Create necessary directories with proper permissions
 mkdir -p /app/staticfiles /app/media/posters /app/logs
 chmod -R 777 /app/staticfiles /app/media /app/logs
