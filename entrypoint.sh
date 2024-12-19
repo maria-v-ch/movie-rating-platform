@@ -45,4 +45,4 @@ echo "Creating superuser if needed..."
 python manage.py createsuperuser --noinput || true
 
 echo "Starting application..."
-exec "$@" 
+exec "$@"

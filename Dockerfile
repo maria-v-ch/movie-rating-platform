@@ -52,7 +52,8 @@ RUN pip install --upgrade pip && \
 RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
     chown -R app_user:app_user /app && \
     chmod -R 755 /app && \
-    chmod g+s /app/logs /app/media/posters /app/staticfiles
+    chmod g+s /app/logs /app/media/posters /app/staticfiles && \
+    chmod 777 /app/logs /app/media/posters /app/staticfiles
 
 # Copy project files
 COPY --chown=app_user:app_user . .
@@ -65,4 +66,4 @@ RUN chmod +x /app/entrypoint.sh
 USER app_user
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"] 
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
