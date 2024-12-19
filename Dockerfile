@@ -24,6 +24,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings
 
+# Create a non-root user
+RUN useradd -m -U app_user && \
+    mkdir -p /home/app_user
+
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -44,14 +48,22 @@ RUN pip install --upgrade pip && \
 # Copy project
 COPY . .
 
-# Create necessary directories and copy posters
+# Create necessary directories and set permissions
 RUN mkdir -p /app/staticfiles /app/media/posters /app/logs && \
-    chmod 777 /app/logs /app/media && \
-    cp -r /app/movies/static/movies/posters/* /app/media/posters/ || true
+    chown -R app_user:app_user /app && \
+    chmod 777 /app/logs /app/media
+
+# Copy posters with proper permissions
+RUN cp -r /app/movies/static/movies/posters/* /app/media/posters/ || true && \
+    chown -R app_user:app_user /app/media/posters
 
 # Copy entrypoint script and make it executable
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh && \
+    chown app_user:app_user /app/entrypoint.sh
+
+# Switch to non-root user
+USER app_user
 
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]

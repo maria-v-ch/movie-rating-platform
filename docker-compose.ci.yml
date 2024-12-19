@@ -17,6 +17,7 @@ services:
       - DB_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    user: app_user
     depends_on:
       db:
         condition: service_healthy
