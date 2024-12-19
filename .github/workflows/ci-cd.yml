@@ -123,11 +123,23 @@ jobs:
           mkdir -p /home/root/movie_rating_platform
           cd /home/root/movie_rating_platform
           
+          # Configure Git
+          git config --global user.email "deploy@paragoni.space"
+          git config --global user.name "Deploy Bot"
+          
+          # Store credentials securely
+          git config --global credential.helper store
+          echo "https://maria-v-ch:${GH_PAT}@github.com" > ~/.git-credentials
+          chmod 600 ~/.git-credentials
+          
           # Initialize git repository if needed
           if [ ! -d .git ]; then
             git init
             git config --global init.defaultBranch main
-            git remote add origin https://oauth2:${GH_PAT}@github.com/maria-v-ch/movie-rating-platform.git
+            git remote add origin https://github.com/maria-v-ch/movie-rating-platform.git
+          else
+            # Update origin if it exists
+            git remote set-url origin https://github.com/maria-v-ch/movie-rating-platform.git
           fi
           
           # Pull latest changes
