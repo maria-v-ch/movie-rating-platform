@@ -19,6 +19,20 @@ DATABASES = {
     }
 }
 
+# Use dummy cache for tests
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
+# Disable throttling for tests
+REST_FRAMEWORK = {
+    **REST_FRAMEWORK,
+    'DEFAULT_THROTTLE_CLASSES': [],
+    'DEFAULT_THROTTLE_RATES': {}
+}
+
 # Use fast password hasher
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
