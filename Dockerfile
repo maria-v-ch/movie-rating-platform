@@ -50,12 +50,12 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 # Create necessary directories with proper permissions
-RUN mkdir -p /app/media /app/logs /app/staticfiles && \
-    chmod 777 /app/media /app/logs /app/staticfiles
+RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
+    chmod 777 /app/media/posters /app/logs /app/staticfiles
 
 # Copy posters with proper permissions
 RUN cp -r /app/movies/static/movies/posters/* /app/media/posters/ || true && \
-    chown -R app_user:app_user /app/media/posters
+    chown -R app_user:app_user /app/media/posters || true
 
 # Copy entrypoint script and make it executable
 COPY entrypoint.sh /app/entrypoint.sh
