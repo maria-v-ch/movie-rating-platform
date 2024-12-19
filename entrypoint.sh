@@ -20,14 +20,6 @@ wait_for_service "db" "5432" "PostgreSQL"
 # Wait for Redis
 wait_for_service "redis" "6379" "Redis"
 
-# Ensure directories exist with correct permissions
-for dir in "/app/logs" "/app/media/posters" "/app/staticfiles"; do
-    if [ ! -d "$dir" ]; then
-        echo "Creating directory: $dir"
-        install -d -m 755 -o app_user -g app_user "$dir"
-    fi
-done
-
 # Apply database migrations
 echo "Applying database migrations..."
 python manage.py migrate --noinput
