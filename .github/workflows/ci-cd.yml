@@ -85,22 +85,6 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         known_hosts: ${{ secrets.SERVER_KNOWN_HOSTS }}
         if_key_exists: replace
-        config: |
-          Host paragoni.space
-            HostName paragoni.space
-            User ${{ secrets.SERVER_USERNAME }}
-            IdentityFile ~/.ssh/id_rsa
-            StrictHostKeyChecking yes
-          
-          Host github.com
-            HostName github.com
-            User git
-            IdentityFile ~/.ssh/id_rsa
-            StrictHostKeyChecking yes
-
-    - name: Add GitHub to known hosts
-      run: |
-        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
     - name: Verify SSH Connection
       run: |
@@ -123,33 +107,32 @@ jobs:
         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        GH_PAT: ${{ secrets.GH_PAT }}
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: 22
         debug: true
-        envs: SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST,DB_PORT,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD,GRAFANA_ADMIN_PASSWORD,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,TEST_DB_PASSWORD
+        envs: SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST,DB_PORT,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD,GRAFANA_ADMIN_PASSWORD,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,TEST_DB_PASSWORD,GH_PAT
         script: |
           set -e
           echo "Starting deployment process..."
           
           # Create project directory if it doesn't exist
-          mkdir -p /home/${{ secrets.SERVER_USERNAME }}/movie_rating_platform
-          cd /home/${{ secrets.SERVER_USERNAME }}/movie_rating_platform
+          mkdir -p /home/root/movie_rating_platform
+          cd /home/root/movie_rating_platform
           
           # Initialize git repository if needed
           if [ ! -d .git ]; then
             git init
             git config --global init.defaultBranch main
-            git remote add origin git@github.com:maria-v-ch/movie-rating-platform.git
-            git fetch
-            git checkout -f main
-          else
-            # Pull latest changes
-            git fetch
-            git reset --hard origin/main
+            git remote add origin https://oauth2:${GH_PAT}@github.com/maria-v-ch/movie-rating-platform.git
           fi
+          
+          # Pull latest changes
+          git fetch origin main
+          git reset --hard origin/main
           
           echo "Current directory: $(pwd)"
 
@@ -258,12 +241,3 @@ jobs:
           sudo docker-compose ps
 
           echo "Deployment completed successfully!"
-
-    - name: Build and push Docker images
-      env:
-        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      run: |
-        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-        docker-compose build
-        docker-compose push
