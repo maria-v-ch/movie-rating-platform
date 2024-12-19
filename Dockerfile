@@ -49,10 +49,9 @@ RUN pip install --upgrade pip && \
 # Copy project
 COPY . .
 
-# Create necessary directories and set permissions
-RUN mkdir -p /app/staticfiles /app/media/posters /app/logs && \
-    chown -R app_user:app_user /app && \
-    chmod 777 /app/logs /app/media
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/media /app/logs /app/staticfiles && \
+    chmod 777 /app/media /app/logs /app/staticfiles
 
 # Copy posters with proper permissions
 RUN cp -r /app/movies/static/movies/posters/* /app/media/posters/ || true && \
