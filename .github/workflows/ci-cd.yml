@@ -65,13 +65,18 @@ jobs:
       run: |
         echo "Starting tests with CI configuration..."
         export TEST_DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
+        export DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
         export DJANGO_SETTINGS_MODULE=config.test_settings
         docker-compose -f docker-compose.ci.yml config
         docker-compose -f docker-compose.ci.yml down -v
         docker-compose -f docker-compose.ci.yml up -d db
         echo "Waiting for database to be ready..."
         sleep 10
-        docker-compose -f docker-compose.ci.yml run --rm web bash -c "DJANGO_SETTINGS_MODULE=config.test_settings python manage.py test --keepdb"
+        docker-compose -f docker-compose.ci.yml run --rm web bash -c "
+          export DB_PASSWORD=${TEST_DB_PASSWORD} &&
+          export DJANGO_SETTINGS_MODULE=config.test_settings &&
+          python manage.py test --keepdb
+        "
       env:
         DEBUG: 'False'
         SECRET_KEY: ${{ secrets.SECRET_KEY }}

@@ -6,15 +6,16 @@ from .settings import *  # noqa: F403, F401
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': os.environ.get('TEST_DB_PASSWORD'),
-        'HOST': 'db',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'postgres'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD') or os.environ.get('TEST_DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
         'TEST': {
             'NAME': 'test_postgres',
             'SERIALIZE': False,
         },
+        'CONN_MAX_AGE': 0,
     }
 }
 

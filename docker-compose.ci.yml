@@ -26,6 +26,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - DJANGO_SETTINGS_MODULE=config.test_settings
+      - TEST_DB_PASSWORD=${TEST_DB_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "curl -H 'Host: web' -f http://localhost:8000/health/ || exit 1"]
       interval: 30s
