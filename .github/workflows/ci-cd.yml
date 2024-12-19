@@ -153,11 +153,9 @@ jobs:
           chmod 777 logs
           echo "Created logs directory with appropriate permissions"
 
-          # Install and configure Apache
-          if ! command -v apache2 &> /dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y apache2
-          fi
+          # Install required packages
+          sudo apt-get update
+          sudo apt-get install -y apache2 gettext-base
 
           # Enable required Apache modules
           sudo a2enmod proxy
@@ -195,26 +193,29 @@ jobs:
           sudo systemctl reload apache2
 
           # Create .env file with environment variables
-          cat << EOF > .env
+          cat > .env << 'EOL'
           DEBUG=False
-          SECRET_KEY="${SECRET_KEY}"
+          SECRET_KEY=${SECRET_KEY}
           ALLOWED_HOSTS=paragoni.space,www.paragoni.space
           CSRF_TRUSTED_ORIGINS=https://paragoni.space,https://www.paragoni.space
           CSRF_COOKIE_SECURE=True
           CSRF_COOKIE_HTTPONLY=False
           CSRF_USE_SESSIONS=False
           CSRF_COOKIE_SAMESITE=Lax
-          DB_NAME="${DB_NAME}"
-          DB_USER="${DB_USER}"
-          DB_PASSWORD="${DB_PASSWORD}"
+          DB_NAME=${DB_NAME}
+          DB_USER=${DB_USER}
+          DB_PASSWORD=${DB_PASSWORD}
           DB_HOST=db
-          DB_PORT="${DB_PORT}"
-          DJANGO_SUPERUSER_USERNAME="${DJANGO_SUPERUSER_USERNAME}"
-          DJANGO_SUPERUSER_EMAIL="${DJANGO_SUPERUSER_EMAIL}"
-          DJANGO_SUPERUSER_PASSWORD="${DJANGO_SUPERUSER_PASSWORD}"
-          GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD}"
-          EOF
+          DB_PORT=${DB_PORT}
+          DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
+          DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+          DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+          GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+          EOL
 
+          # Substitute environment variables in .env file
+          envsubst < .env > .env.tmp && mv .env.tmp .env
+          chmod 600 .env
           echo "Created .env file"
 
           # Login to Docker Hub

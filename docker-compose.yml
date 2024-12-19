@@ -15,6 +15,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app_network
     environment:
@@ -29,10 +31,10 @@ services:
       - DB_PORT=${DB_PORT:-5432}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
 
   db:
     image: postgres:13
@@ -62,7 +64,8 @@ services:
       - static_volume:/app/staticfiles
       - /etc/letsencrypt:/etc/letsencrypt
     depends_on:
-      - web
+      web:
+        condition: service_healthy
     networks:
       - app_network
 
