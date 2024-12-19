@@ -75,6 +75,7 @@ jobs:
         docker-compose -f docker-compose.ci.yml run --rm web bash -c "
           export DB_PASSWORD=${TEST_DB_PASSWORD} &&
           export DJANGO_SETTINGS_MODULE=config.test_settings &&
+          python manage.py migrate --noinput &&
           python manage.py test --keepdb
         "
       env:

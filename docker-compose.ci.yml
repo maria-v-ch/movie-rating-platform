@@ -42,14 +42,16 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${TEST_DB_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=trust
     networks:
       - app_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
-    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off
+      retries: 10
+      start_period: 10s
+    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c max_connections=100
 
   nginx:
     image: nginx:latest

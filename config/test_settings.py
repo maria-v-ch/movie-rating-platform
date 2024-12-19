@@ -2,7 +2,7 @@
 
 from .settings import *  # noqa: F403, F401
 
-# Use in-memory SQLite for tests
+# Database settings for tests
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -18,16 +18,6 @@ DATABASES = {
         'CONN_MAX_AGE': 0,
     }
 }
-
-# Disable migrations during tests
-class DisableMigrations:
-    def __contains__(self, item):
-        return True
-
-    def __getitem__(self, item):
-        return None
-
-MIGRATION_MODULES = DisableMigrations()
 
 # Use fast password hasher
 PASSWORD_HASHERS = [
@@ -77,20 +67,6 @@ TEMPLATES = [
 # Disable CSRF for tests
 MIDDLEWARE = [m for m in MIDDLEWARE if 'CSRFMiddleware' not in m]
 
-# Use Redis for testing
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{env('REDIS_HOST', default='redis')}:{env('REDIS_PORT', default=6379)}/0",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "SOCKET_CONNECT_TIMEOUT": 5,
-            "SOCKET_TIMEOUT": 5,
-            "RETRY_ON_TIMEOUT": True,
-        }
-    }
-}
-
 # Cache settings for testing
 CACHE_TTL = 60  # 1 minute for testing
 CACHE_MIDDLEWARE_SECONDS = CACHE_TTL
@@ -100,12 +76,6 @@ TEST_NON_SERIALIZED_APPS = ["movies", "reviews", "users"]
 
 # Email settings for testing
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
-EMAIL_HOST = "localhost"
-EMAIL_PORT = 1025
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""
-EMAIL_USE_TLS = False
-DEFAULT_FROM_EMAIL = "testing@example.com"
 
 # CSRF settings
 CSRF_COOKIE_SECURE = False
