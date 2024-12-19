@@ -124,12 +124,23 @@ jobs:
           set -e
           echo "Starting deployment process..."
           
-          # Navigate to project directory
+          # Create project directory if it doesn't exist
+          mkdir -p /home/${{ secrets.SERVER_USERNAME }}/movie_rating_platform
           cd /home/${{ secrets.SERVER_USERNAME }}/movie_rating_platform
+          
+          # Initialize git repository if needed
+          if [ ! -d .git ]; then
+            git init
+            git remote add origin https://github.com/maria-v-ch/movie-rating-platform.git
+            git fetch
+            git checkout -f main
+          else
+            # Pull latest changes
+            git fetch
+            git reset --hard origin/main
+          fi
+          
           echo "Current directory: $(pwd)"
-
-          # Pull latest changes
-          git pull origin main
 
           # Create logs directory and set permissions
           mkdir -p logs
