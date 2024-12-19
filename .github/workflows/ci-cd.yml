@@ -48,18 +48,19 @@ jobs:
     
     - name: Run tests
       run: |
-        docker-compose -f docker-compose.yml up -d db
-        docker-compose -f docker-compose.yml run --rm web python manage.py test
+        echo "Starting tests with CI configuration..."
+        docker-compose -f docker-compose.ci.yml config
+        docker-compose -f docker-compose.ci.yml up -d db
+        docker-compose -f docker-compose.ci.yml run --rm web python manage.py test
       env:
         DEBUG: 'False'
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,paragoni.space,www.paragoni.space
+        ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
         DB_NAME: postgres
         DB_USER: postgres
         DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
         DB_HOST: db
         DB_PORT: 5432
-        DATABASE_URL: postgres://postgres:${{ secrets.TEST_DB_PASSWORD }}@db:5432/postgres
 
   deploy:
     needs: build-and-test
