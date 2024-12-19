@@ -66,8 +66,11 @@ jobs:
         echo "Starting tests with CI configuration..."
         export TEST_DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
         docker-compose -f docker-compose.ci.yml config
+        docker-compose -f docker-compose.ci.yml down -v
         docker-compose -f docker-compose.ci.yml up -d db
-        docker-compose -f docker-compose.ci.yml run --rm web python manage.py test
+        echo "Waiting for database to be ready..."
+        sleep 10
+        docker-compose -f docker-compose.ci.yml run --rm web bash -c "python manage.py test --keepdb"
       env:
         DEBUG: 'False'
         SECRET_KEY: ${{ secrets.SECRET_KEY }}

@@ -25,6 +25,7 @@ services:
       - DB_PASSWORD=${TEST_DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=5432
+      - DJANGO_SETTINGS_MODULE=config.test_settings
     healthcheck:
       test: ["CMD-SHELL", "curl -H 'Host: web' -f http://localhost:8000/health/ || exit 1"]
       interval: 30s
@@ -34,6 +35,8 @@ services:
 
   db:
     image: postgres:13
+    tmpfs:
+      - /var/lib/postgresql/data
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
@@ -45,6 +48,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off
 
   nginx:
     image: nginx:latest

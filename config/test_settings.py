@@ -2,17 +2,65 @@
 
 from .settings import *  # noqa: F403, F401
 
-# Override database settings for testing
+# Use in-memory SQLite for tests
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "movies_test",
-        "USER": "movies_test",
-        "PASSWORD": "movies_test",
-        "HOST": "db",
-        "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': os.environ.get('TEST_DB_PASSWORD'),
+        'HOST': 'db',
+        'PORT': '5432',
+        'TEST': {
+            'NAME': 'test_postgres',
+            'SERIALIZE': False,
+        },
     }
 }
+
+# Disable migrations during tests
+class DisableMigrations:
+    def __contains__(self, item):
+        return True
+
+    def __getitem__(self, item):
+        return None
+
+MIGRATION_MODULES = DisableMigrations()
+
+# Use fast password hasher
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+]
+
+# Disable logging during tests
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'root': {
+        'handlers': ['null'],
+        'level': 'CRITICAL',
+    },
+}
+
+# Disable debug mode
+DEBUG = False
+
+# Use fast template loader
+TEMPLATES[0]['OPTIONS']['loaders'] = [
+    ('django.template.loaders.cached.Loader', [
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    ]),
+]
+
+# Disable CSRF for tests
+MIDDLEWARE = [m for m in MIDDLEWARE if 'CSRFMiddleware' not in m]
 
 # Use Redis for testing
 CACHES = {
@@ -31,25 +79,6 @@ CACHES = {
 # Cache settings for testing
 CACHE_TTL = 60  # 1 minute for testing
 CACHE_MIDDLEWARE_SECONDS = CACHE_TTL
-
-# Update logging settings for tests
-locals().update(
-    {
-        "LOGGING": {
-            "version": 1,
-            "disable_existing_loggers": False,
-            "handlers": {
-                "console": {
-                    "class": "logging.StreamHandler",
-                },
-            },
-            "root": {
-                "handlers": ["console"],
-                "level": "WARNING",
-            },
-        }
-    }
-)
 
 # Test-specific settings
 TEST_NON_SERIALIZED_APPS = ["movies", "reviews", "users"]
@@ -75,6 +104,3 @@ CSRF_TRUSTED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
-
-# Debug should be False in tests
-DEBUG = False
