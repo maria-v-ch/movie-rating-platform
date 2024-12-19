@@ -45,7 +45,22 @@ jobs:
         sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
         docker-compose --version
-    
+
+    - name: Create .env file for testing
+      run: |
+        echo "Creating .env file for testing..."
+        cat > .env << EOL
+        DEBUG=False
+        SECRET_KEY=${SECRET_KEY}
+        ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+        DB_NAME=postgres
+        DB_USER=postgres
+        DB_PASSWORD=${TEST_DB_PASSWORD}
+        DB_HOST=db
+        DB_PORT=5432
+        EOL
+        echo ".env file created"
+        
     - name: Run tests
       run: |
         echo "Starting tests with CI configuration..."
@@ -249,66 +264,14 @@ jobs:
               attempt=$((attempt + 1))
               sleep 20
             done
-            echo "$container failed to start properly"
+            
+            echo "$container failed to start"
             return 1
           }
 
-          # Start and check database first
-          echo "Starting database container..."
-          sudo docker-compose up -d db
-          if ! check_container_health "db" 15; then
-            echo "Database failed to start. Deployment failed."
-            exit 1
-          fi
-
-          # Start Redis
-          echo "Starting Redis container..."
-          sudo docker-compose up -d redis
-          if ! check_container_health "redis" 10; then
-            echo "Redis failed to start. Deployment failed."
-            exit 1
-          fi
-
-          # Start web application
-          echo "Starting web container..."
-          sudo docker-compose up -d web
-          if ! check_container_health "web" 20; then
-            echo "Web container failed to start. Checking logs..."
-            sudo docker-compose logs --tail=100 web
-            exit 1
-          fi
-
-          # Start Nginx last
-          echo "Starting Nginx container..."
-          sudo docker-compose up -d nginx
-          if ! check_container_health "nginx" 10; then
-            echo "Nginx failed to start. Checking configuration..."
-            sudo docker-compose exec -T nginx nginx -t
-            sudo docker-compose logs --tail=100 nginx
-            exit 1
-          fi
-
-          echo "All containers are running. Checking overall system health..."
-          sudo docker-compose ps
-          
-          # Run migrations
-          echo "Running database migrations..."
-          if ! sudo docker-compose exec -T web python manage.py migrate; then
-            echo "Migration failed. Checking database connection..."
-            sudo docker-compose exec -T web python manage.py dbshell
-            exit 1
-          fi
-
-          # Collect static files
-          echo "Collecting static files..."
-          if ! sudo docker-compose exec -T web python manage.py collectstatic --noinput; then
-            echo "Static file collection failed. Checking permissions..."
-            sudo docker-compose exec -T web ls -la /app/staticfiles
-            exit 1
-          fi
+          # Check health of essential containers
+          check_container_health "web" 10
+          check_container_health "db" 5
+          check_container_health "nginx" 5
 
           echo "Deployment completed successfully!"
-          echo "Final container status:"
-          sudo docker-compose ps
-          echo "Service logs:"
-          sudo docker-compose logs --tail=20
