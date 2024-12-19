@@ -19,7 +19,7 @@ jobs:
       DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
       DB_HOST: db
       DB_PORT: 5432
-      DATABASE_URL: postgres://postgres:${{ secrets.TEST_DB_PASSWORD }}@db:5432/postgres
+      TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
     
     steps:
     - name: Checkout code
@@ -49,6 +49,7 @@ jobs:
     - name: Run tests
       run: |
         echo "Starting tests with CI configuration..."
+        export TEST_DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
         docker-compose -f docker-compose.ci.yml config
         docker-compose -f docker-compose.ci.yml up -d db
         docker-compose -f docker-compose.ci.yml run --rm web python manage.py test
@@ -61,6 +62,7 @@ jobs:
         DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
         DB_HOST: db
         DB_PORT: 5432
+        TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
 
   deploy:
     needs: build-and-test

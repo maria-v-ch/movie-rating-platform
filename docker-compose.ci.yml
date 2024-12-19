@@ -18,13 +18,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.socket().connect(('db', 5432))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db:
     image: postgres:13
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${TEST_DB_PASSWORD}
+      - POSTGRES_PASSWORD=${TEST_DB_PASSWORD:-testpassword}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
