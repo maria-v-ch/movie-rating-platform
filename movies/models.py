@@ -52,7 +52,7 @@ class Movie(models.Model):
         """Return the URL for the movie poster."""
         # Check for static poster first using the poster filename
         if self.poster:
-            return f"/static/movies/posters/{self.poster}"
+            return f"/static/movies/{self.poster}"
 
         # Fallback to default poster
         return "/static/movies/posters/default.jpg"
