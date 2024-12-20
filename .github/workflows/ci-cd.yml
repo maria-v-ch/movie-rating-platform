@@ -38,6 +38,12 @@ jobs:
       with:
         python-version: '3.10'
 
+    - name: Install Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose-plugin
+        docker compose version
+
     - name: Setup environment file
       run: |
         cp .env.development.sample .env.development
@@ -45,9 +51,9 @@ jobs:
     - name: Run tests
       run: |
         echo "Starting tests with CI configuration..."
-        docker-compose -f docker-compose.ci.yml config
-        docker-compose -f docker-compose.ci.yml down -v
-        docker-compose -f docker-compose.ci.yml up -d db
+        docker compose -f docker-compose.ci.yml config
+        docker compose -f docker-compose.ci.yml down -v
+        docker compose -f docker-compose.ci.yml up -d db
         echo "Waiting for database to be ready..."
         sleep 10
-        docker-compose -f docker-compose.ci.yml run --rm web bash -c "python manage.py migrate --noinput && python manage.py test -v 2"
+        docker compose -f docker-compose.ci.yml run --rm web bash -c "python manage.py migrate --noinput && python manage.py test -v 2"
