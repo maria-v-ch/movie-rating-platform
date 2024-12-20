@@ -7,53 +7,308 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
+    
     env:
-      DEBUG: False
+      DEBUG: 'False'
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,paragoni.space,www.paragoni.space
       DB_NAME: postgres
       DB_USER: postgres
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
       DB_HOST: db
       DB_PORT: 5432
       TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
-      DJANGO_SETTINGS_MODULE: config.test_settings
-      CSRF_TRUSTED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
-      CSRF_COOKIE_SECURE: False
-      CSRF_COOKIE_HTTPONLY: False
-      CSRF_USE_SESSIONS: False
-      CSRF_COOKIE_SAMESITE: Lax
-      DJANGO_SUPERUSER_USERNAME: admin
-      DJANGO_SUPERUSER_EMAIL: admin@example.com
-      DJANGO_SUPERUSER_PASSWORD: admin_password
-      GRAFANA_ADMIN_PASSWORD: admin
-
+    
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
         python-version: '3.10'
-
-    - name: Install Docker Compose
+    
+    - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y docker-compose-plugin
-        docker compose version
-
-    - name: Setup environment file
+        sudo apt-get install -y gcc libpq-dev python3-dev
+    
+    - name: Install dependencies
       run: |
-        cp .env.development.sample .env.development
-        
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Set up Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version
+    
     - name: Run tests
       run: |
         echo "Starting tests with CI configuration..."
-        docker compose -f docker-compose.ci.yml config
-        docker compose -f docker-compose.ci.yml down -v
-        docker compose -f docker-compose.ci.yml up -d db
-        echo "Waiting for database to be ready..."
-        sleep 10
-        docker compose -f docker-compose.ci.yml run --rm web bash -c "python manage.py migrate --noinput && python manage.py test -v 2"
+        export TEST_DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
+        docker-compose -f docker-compose.ci.yml config
+        docker-compose -f docker-compose.ci.yml up -d db
+        docker-compose -f docker-compose.ci.yml run --rm web python manage.py test
+      env:
+        DEBUG: 'False'
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
+        DB_NAME: postgres
+        DB_USER: postgres
+        DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        DB_HOST: db
+        DB_PORT: 5432
+        TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Debug SSH Setup
+      run: |
+        echo "Setting up SSH debugging..."
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SERVER_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        echo "Known hosts file created"
+        ls -la ~/.ssh
+        cat ~/.ssh/known_hosts
+
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        known_hosts: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        if_key_exists: replace
+
+    - name: Verify SSH Connection
+      run: |
+        echo "Testing SSH connection..."
+        ssh -v -T ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: db
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DJANGO_SUPERUSER_USERNAME: ${{ secrets.DJANGO_SUPERUSER_USERNAME }}
+        DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+        DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+        GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        GH_PAT: ${{ secrets.GH_PAT }}
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        debug: true
+        envs: SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST,DB_PORT,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD,GRAFANA_ADMIN_PASSWORD,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,TEST_DB_PASSWORD,GH_PAT
+        script: |
+          set -e
+          echo "Starting deployment process..."
+          
+          # Create project directory if it doesn't exist
+          mkdir -p /home/root/movie_rating_platform
+          cd /home/root/movie_rating_platform
+          
+          # Configure Git
+          git config --global user.email "deploy@paragoni.space"
+          git config --global user.name "Deploy Bot"
+          
+          # Store credentials securely
+          git config --global credential.helper store
+          echo "https://maria-v-ch:${GH_PAT}@github.com" > ~/.git-credentials
+          chmod 600 ~/.git-credentials
+          
+          # Initialize git repository if needed
+          if [ ! -d .git ]; then
+            git init
+            git config --global init.defaultBranch main
+            git remote add origin https://github.com/maria-v-ch/movie-rating-platform.git
+          else
+            # Update origin if it exists
+            git remote set-url origin https://github.com/maria-v-ch/movie-rating-platform.git
+          fi
+          
+          # Pull latest changes
+          git fetch origin main
+          git reset --hard origin/main
+          
+          echo "Current directory: $(pwd)"
+
+          # Create logs directory and set permissions
+          mkdir -p logs
+          chmod 777 logs
+          echo "Created logs directory with appropriate permissions"
+
+          # Install required packages
+          sudo apt-get update
+          sudo apt-get install -y apache2 gettext-base
+
+          # Enable required Apache modules
+          sudo a2enmod proxy
+          sudo a2enmod proxy_http
+          sudo a2enmod ssl
+          sudo a2enmod rewrite
+
+          # Create initial HTTP-only Apache configuration
+          cat << EOF | sudo tee /etc/apache2/sites-available/paragoni.space.conf
+          <VirtualHost *:80>
+              ServerName paragoni.space
+              ServerAlias www.paragoni.space
+              
+              ProxyPreserveHost On
+              ProxyPass / http://127.0.0.1:8080/
+              ProxyPassReverse / http://127.0.0.1:8080/
+              
+              ErrorLog \${APACHE_LOG_DIR}/paragoni.space-error.log
+              CustomLog \${APACHE_LOG_DIR}/paragoni.space-access.log combined
+          </VirtualHost>
+          EOF
+
+          sudo a2ensite paragoni.space.conf
+
+          # Install certbot if not present
+          if ! command -v certbot &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y certbot python3-certbot-apache
+          fi
+
+          # Ensure SSL certificates are in place (using Apache plugin)
+          sudo certbot --apache -d paragoni.space -d www.paragoni.space --non-interactive --agree-tos -m m.chuvtaeva@gmail.com
+
+          # Reload Apache
+          sudo systemctl reload apache2
+
+          # Create .env file with environment variables
+          cat > .env << 'EOL'
+          DEBUG=False
+          SECRET_KEY=${SECRET_KEY}
+          ALLOWED_HOSTS=paragoni.space,www.paragoni.space
+          CSRF_TRUSTED_ORIGINS=https://paragoni.space,https://www.paragoni.space
+          CSRF_COOKIE_SECURE=True
+          CSRF_COOKIE_HTTPONLY=False
+          CSRF_USE_SESSIONS=False
+          CSRF_COOKIE_SAMESITE=Lax
+          DB_NAME=${DB_NAME}
+          DB_USER=${DB_USER}
+          DB_PASSWORD=${DB_PASSWORD}
+          DB_HOST=db
+          DB_PORT=${DB_PORT}
+          DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
+          DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+          DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+          GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+          EOL
+
+          # Substitute environment variables in .env file
+          envsubst < .env > .env.tmp && mv .env.tmp .env
+          chmod 600 .env
+          echo "Created .env file"
+
+          # Login to Docker Hub
+          echo "${DOCKERHUB_TOKEN}" | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
+
+          # Stop and remove existing containers
+          echo "Stopping and removing existing containers..."
+          sudo docker-compose down -v
+
+          # Pull the latest images
+          sudo docker-compose pull
+
+          # Build and start the services
+          echo "Starting services with detailed logging..."
+          sudo docker-compose up -d --build
+
+          # Function to check container health
+          check_container_health() {
+            local container=$1
+            local max_attempts=$2
+            local attempt=1
+            
+            echo "Checking health of $container container..."
+            while [ $attempt -le $max_attempts ]; do
+              if sudo docker-compose ps $container | grep -q "Up"; then
+                echo "$container is running"
+                return 0
+              fi
+              echo "Waiting for $container... (Attempt $attempt/$max_attempts)"
+              sudo docker-compose logs --tail=50 $container
+              attempt=$((attempt + 1))
+              sleep 20
+            done
+            echo "$container failed to start properly"
+            return 1
+          }
+
+          # Start and check database first
+          echo "Starting database container..."
+          sudo docker-compose up -d db
+          if ! check_container_health "db" 15; then
+            echo "Database failed to start. Deployment failed."
+            exit 1
+          fi
+
+          # Start Redis
+          echo "Starting Redis container..."
+          sudo docker-compose up -d redis
+          if ! check_container_health "redis" 10; then
+            echo "Redis failed to start. Deployment failed."
+            exit 1
+          fi
+
+          # Start web application
+          echo "Starting web container..."
+          sudo docker-compose up -d web
+          if ! check_container_health "web" 20; then
+            echo "Web container failed to start. Checking logs..."
+            sudo docker-compose logs --tail=100 web
+            exit 1
+          fi
+
+          # Start Nginx last
+          echo "Starting Nginx container..."
+          sudo docker-compose up -d nginx
+          if ! check_container_health "nginx" 10; then
+            echo "Nginx failed to start. Checking configuration..."
+            sudo docker-compose exec -T nginx nginx -t
+            sudo docker-compose logs --tail=100 nginx
+            exit 1
+          fi
+
+          echo "All containers are running. Checking overall system health..."
+          sudo docker-compose ps
+          
+          # Run migrations
+          echo "Running database migrations..."
+          if ! sudo docker-compose exec -T web python manage.py migrate; then
+            echo "Migration failed. Checking database connection..."
+            sudo docker-compose exec -T web python manage.py dbshell
+            exit 1
+          fi
+
+          # Collect static files
+          echo "Collecting static files..."
+          if ! sudo docker-compose exec -T web python manage.py collectstatic --noinput; then
+            echo "Static file collection failed. Checking permissions..."
+            sudo docker-compose exec -T web ls -la /app/staticfiles
+            exit 1
+          fi
+
+          echo "Deployment completed successfully!"
+          echo "Final container status:"
+          sudo docker-compose ps
+          echo "Service logs:"
+          sudo docker-compose logs --tail=20
