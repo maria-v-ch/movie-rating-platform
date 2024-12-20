@@ -12,6 +12,9 @@ echo "Database is ready!"
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+echo "Loading initial data..."
+python manage.py loaddata movies/fixtures/initial_movies.json
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
