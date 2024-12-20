@@ -50,13 +50,9 @@ class Movie(models.Model):
     @property
     def poster_url(self):
         """Return the URL for the movie poster."""
-        # Check for uploaded poster first
-        if self.poster and hasattr(self.poster, "url"):
-            return self.poster.url
-
-        # Then check for static poster using the poster filename from the fixture
+        # Check for static poster first using the poster filename
         if self.poster:
-            return f"/media/posters/{self.poster}"
+            return f"/static/movies/posters/{self.poster}"
 
         # Fallback to default poster
         return "/static/movies/posters/default.jpg"
