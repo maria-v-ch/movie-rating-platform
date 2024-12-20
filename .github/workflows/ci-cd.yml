@@ -100,6 +100,7 @@ jobs:
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         DB_HOST: db
         DB_PORT: ${{ secrets.DB_PORT }}
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
         DJANGO_SUPERUSER_USERNAME: ${{ secrets.DJANGO_SUPERUSER_USERNAME }}
         DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
         DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
@@ -114,7 +115,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: 22
         debug: true
-        envs: SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST,DB_PORT,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD,GRAFANA_ADMIN_PASSWORD,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,TEST_DB_PASSWORD,GH_PAT
+        envs: SECRET_KEY,DB_NAME,DB_USER,DB_PASSWORD,DB_HOST,DB_PORT,ALLOWED_HOSTS,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD,GRAFANA_ADMIN_PASSWORD,DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,TEST_DB_PASSWORD,GH_PAT
         script: |
           set -e
           echo "Starting deployment process..."
@@ -207,7 +208,7 @@ jobs:
           sudo systemctl reload apache2
 
           # Create .env file with environment variables
-          cat > .env << 'EOL'
+          cat > .env << EOL
           DEBUG=False
           SECRET_KEY=${SECRET_KEY}
           ALLOWED_HOSTS=${ALLOWED_HOSTS}
