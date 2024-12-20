@@ -89,6 +89,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
+# Using Prometheus-instrumented database backend for metrics collection
 DATABASES = {
     "default": {
         "ENGINE": "django_prometheus.db.backends.postgresql",
@@ -291,3 +292,4 @@ POPULAR_MOVIES_CACHE_TIMEOUT = 60 * 60 * 12
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+# Trigger rebuild
