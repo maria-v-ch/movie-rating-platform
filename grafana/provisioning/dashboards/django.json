@@ -266,8 +266,8 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(django_model_inserts_total[5m])",
-          "legendFormat": "Inserts",
+          "expr": "sum(rate(django_model_inserts_total[5m])) by (model)",
+          "legendFormat": "Inserts - {{model}}",
           "range": true,
           "refId": "A"
         },
@@ -277,9 +277,9 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(django_model_updates_total[5m])",
+          "expr": "sum(rate(django_model_updates_total[5m])) by (model)",
           "hide": false,
-          "legendFormat": "Updates",
+          "legendFormat": "Updates - {{model}}",
           "range": true,
           "refId": "B"
         },
@@ -289,14 +289,14 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(django_model_deletes_total[5m])",
+          "expr": "sum(rate(django_model_deletes_total[5m])) by (model)",
           "hide": false,
-          "legendFormat": "Deletes",
+          "legendFormat": "Deletes - {{model}}",
           "range": true,
           "refId": "C"
         }
       ],
-      "title": "Database Operations",
+      "title": "Database Operations by Model",
       "type": "timeseries"
     },
     {
