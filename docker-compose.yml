@@ -8,8 +8,8 @@ services:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
       - logs_volume:/app/logs
-    expose:
-      - 8000
+    ports:
+      - "8000:8000"
     env_file:
       - .env
     depends_on:
@@ -53,29 +53,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  nginx:
-    image: nginx:latest
-    ports:
-      - "8080:80"
-      - "8443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      web:
-        condition: service_healthy
-    networks:
-      - app_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
 
   redis:
     image: redis:6-alpine
@@ -125,6 +102,31 @@ services:
     depends_on:
       prometheus:
         condition: service_healthy
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 networks:
   app_network:
