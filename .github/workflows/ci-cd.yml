@@ -13,7 +13,7 @@ jobs:
     env:
       DEBUG: 'False'
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0,paragoni.space,www.paragoni.space
+      ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
       DB_NAME: postgres
       DB_USER: postgres
       DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
@@ -56,7 +56,7 @@ jobs:
       env:
         DEBUG: 'False'
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
         DB_NAME: postgres
         DB_USER: postgres
         DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
@@ -170,8 +170,22 @@ jobs:
               ServerAlias www.paragoni.space
               
               ProxyPreserveHost On
-              ProxyPass / http://127.0.0.1:8080/
-              ProxyPassReverse / http://127.0.0.1:8080/
+              ProxyPass / http://127.0.0.1:8000/
+              ProxyPassReverse / http://127.0.0.1:8000/
+              
+              # Static files
+              ProxyPass /static/ !
+              ProxyPass /media/ !
+              Alias /static/ /home/root/movie_rating_platform/staticfiles/
+              Alias /media/ /home/root/movie_rating_platform/media/
+              
+              <Directory /home/root/movie_rating_platform/staticfiles/>
+                  Require all granted
+              </Directory>
+              
+              <Directory /home/root/movie_rating_platform/media/>
+                  Require all granted
+              </Directory>
               
               ErrorLog \${APACHE_LOG_DIR}/paragoni.space-error.log
               CustomLog \${APACHE_LOG_DIR}/paragoni.space-access.log combined
@@ -196,7 +210,7 @@ jobs:
           cat > .env << 'EOL'
           DEBUG=False
           SECRET_KEY=${SECRET_KEY}
-          ALLOWED_HOSTS=paragoni.space,www.paragoni.space
+          ALLOWED_HOSTS=${ALLOWED_HOSTS}
           CSRF_TRUSTED_ORIGINS=https://paragoni.space,https://www.paragoni.space
           CSRF_COOKIE_SECURE=True
           CSRF_COOKIE_HTTPONLY=False
@@ -281,10 +295,26 @@ jobs:
           # Start Nginx last
           echo "Starting Nginx container..."
           sudo docker-compose up -d nginx
+          echo "Checking Nginx container status..."
+          sudo docker-compose ps nginx
+          echo "Checking Nginx logs..."
+          sudo docker-compose logs --tail=100 nginx
+          echo "Verifying Nginx configuration..."
+          sudo docker-compose exec -T nginx nginx -t || true
+          echo "Checking if Nginx is listening..."
+          sudo docker-compose exec -T nginx curl -v localhost/health/ || true
+          
           if ! check_container_health "nginx" 10; then
-            echo "Nginx failed to start. Checking configuration..."
-            sudo docker-compose exec -T nginx nginx -t
+            echo "Nginx failed to start. Detailed diagnostics:"
+            echo "1. Container Status:"
+            sudo docker-compose ps nginx
+            echo "2. Container Logs:"
             sudo docker-compose logs --tail=100 nginx
+            echo "3. Nginx Configuration Test:"
+            sudo docker-compose exec -T nginx nginx -t || true
+            echo "4. Network Status:"
+            sudo docker network ls
+            sudo docker network inspect movie_rating_platform_app_network
             exit 1
           fi
 
