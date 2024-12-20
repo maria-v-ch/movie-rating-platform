@@ -266,7 +266,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(django_model_inserts_total[5m])) by (model)",
+          "expr": "increase(django_model_inserts_total[1m])",
           "legendFormat": "Inserts - {{model}}",
           "range": true,
           "refId": "A"
@@ -277,7 +277,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(django_model_updates_total[5m])) by (model)",
+          "expr": "increase(django_model_updates_total[1m])",
           "hide": false,
           "legendFormat": "Updates - {{model}}",
           "range": true,
@@ -289,7 +289,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(django_model_deletes_total[5m])) by (model)",
+          "expr": "increase(django_model_deletes_total[1m])",
           "hide": false,
           "legendFormat": "Deletes - {{model}}",
           "range": true,

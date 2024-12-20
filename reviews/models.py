@@ -3,9 +3,10 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django_prometheus.models import ExportModelOperationsMixin
 
 
-class Review(models.Model):
+class Review(ExportModelOperationsMixin('review'), models.Model):
     movie = models.ForeignKey("movies.Movie", on_delete=models.CASCADE, related_name="reviews")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reviews")
     text = models.TextField()
@@ -24,7 +25,7 @@ class Review(models.Model):
         return f"Review by {self.user.username} for {self.movie.title}"
 
 
-class Rating(models.Model):
+class Rating(ExportModelOperationsMixin('rating'), models.Model):
     movie = models.ForeignKey("movies.Movie", on_delete=models.CASCADE, related_name="ratings")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ratings")
     score = models.DecimalField(

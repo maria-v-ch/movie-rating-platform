@@ -2,9 +2,10 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Avg
 from django.utils.translation import gettext_lazy as _
+from django_prometheus.models import ExportModelOperationsMixin
 
 
-class User(AbstractUser):
+class User(ExportModelOperationsMixin('user'), AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     bio = models.TextField(max_length=500, blank=True)
     profile_image = models.ImageField(upload_to="profile_images/", null=True, blank=True)
@@ -37,7 +38,7 @@ class User(AbstractUser):
         return self.favorited_movies.all()
 
 
-class UserFavoriteMovie(models.Model):
+class UserFavoriteMovie(ExportModelOperationsMixin('user_favorite_movie'), models.Model):
     user = models.ForeignKey(User, related_name="user_favorites", on_delete=models.CASCADE)
     movie = models.ForeignKey("movies.Movie", related_name="user_favorites", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
