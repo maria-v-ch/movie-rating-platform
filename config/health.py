@@ -13,4 +13,4 @@ def health_check(request):
         return JsonResponse(
             {"status": "unhealthy", "database": "disconnected", "error": str(e)},
             status=503,
-        ) 
+        )
