@@ -6,6 +6,7 @@ scrape_configs:
   - job_name: 'django'
     static_configs:
       - targets: ['web:8000']
+    metrics_path: '/metrics'
 
   - job_name: 'nginx'
     static_configs:
@@ -17,4 +18,4 @@ scrape_configs:
 
   - job_name: 'redis'
     static_configs:
-      - targets: ['redis:6379'] 
+      - targets: ['redis:6379']
