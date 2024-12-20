@@ -19,17 +19,18 @@ DATABASES = {
     }
 }
 
-# Use dummy cache for tests
+# Use memory cache for tests
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
-# Disable throttling for tests
+# Configure throttling for tests
 REST_FRAMEWORK = {
-    **REST_FRAMEWORK,
-    'DEFAULT_THROTTLE_CLASSES': [],
+    **REST_FRAMEWORK,  # Keep other settings
+    'DEFAULT_THROTTLE_CLASSES': [],  # Disable throttling for tests
     'DEFAULT_THROTTLE_RATES': {}
 }
 
@@ -63,7 +64,6 @@ TEMPLATES = [
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',

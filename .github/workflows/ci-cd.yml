@@ -46,48 +46,24 @@ jobs:
         sudo chmod +x /usr/local/bin/docker-compose
         docker-compose --version
 
-    - name: Create .env file for testing
+    - name: Set up test environment
       run: |
-        echo "Creating .env file for testing..."
-        cat > .env << EOL
-        DEBUG=False
-        SECRET_KEY=${SECRET_KEY}
-        ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-        DB_NAME=postgres
-        DB_USER=postgres
-        DB_PASSWORD=${TEST_DB_PASSWORD}
-        DB_HOST=db
-        DB_PORT=5432
-        EOL
-        echo ".env file created"
+        echo "Setting up test environment..."
+        export TEST_DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
+        export DJANGO_SETTINGS_MODULE=config.test_settings
         
     - name: Run tests
       run: |
         echo "Starting tests with CI configuration..."
-        export TEST_DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
-        export DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
-        export DJANGO_SETTINGS_MODULE=config.test_settings
         docker-compose -f docker-compose.ci.yml config
         docker-compose -f docker-compose.ci.yml down -v
         docker-compose -f docker-compose.ci.yml up -d db
         echo "Waiting for database to be ready..."
         sleep 10
-        docker-compose -f docker-compose.ci.yml run --rm web bash -c "
-          export DB_PASSWORD=${TEST_DB_PASSWORD} &&
-          export DJANGO_SETTINGS_MODULE=config.test_settings &&
-          python manage.py migrate --noinput &&
-          python manage.py test --keepdb
-        "
+        docker-compose -f docker-compose.ci.yml run --rm web bash -c "python manage.py migrate --noinput && python manage.py test -v 2"
       env:
-        DEBUG: 'False'
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
-        DB_NAME: postgres
-        DB_USER: postgres
-        DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
-        DB_HOST: db
-        DB_PORT: 5432
         TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        DJANGO_SETTINGS_MODULE: config.test_settings
 
   deploy:
     needs: build-and-test
