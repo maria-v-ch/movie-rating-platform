@@ -4,9 +4,15 @@ global:
 
 scrape_configs:
   - job_name: 'django'
+    scheme: https
     static_configs:
-      - targets: ['web:8000']
+      - targets: ['paragoni.space']
     metrics_path: '/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    honor_labels: true
+    tls_config:
+      insecure_skip_verify: true
 
   - job_name: 'nginx'
     static_configs:
