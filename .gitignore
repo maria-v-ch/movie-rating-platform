@@ -63,6 +63,7 @@ examplary_confs/
 examplary\ confs/
 docs/
 scripts/
+run_tests_ci.sh
 
 # Docker
 .docker/

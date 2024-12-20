@@ -1,5 +1,6 @@
-from django.http import JsonResponse
 from django.db import connection
+from django.http import JsonResponse
+
 
 def health_check(request):
     try:
@@ -11,5 +12,5 @@ def health_check(request):
     except Exception as e:
         return JsonResponse(
             {"status": "unhealthy", "database": "disconnected", "error": str(e)},
-            status=503
+            status=503,
         ) 
