@@ -223,3 +223,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - UI components from Bootstrap 5
 - Monitoring stack: Prometheus & Grafana
 - Testing framework: Django Test Framework with Coverage.py
+
+## Admin Access
+The admin interface is available at `/admin/`. Credentials are managed through environment variables.
