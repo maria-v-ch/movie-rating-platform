@@ -1,5 +1,7 @@
 # Movie Rating Platform
 
+[GitHub Repository](https://github.com/maria-v-ch/movie-rating-platform)
+
 A Django-based platform for rating and reviewing art-house films, similar to IMDb but focused on art cinema. The platform allows users to browse movies, leave reviews, and rate films while providing detailed information about art-house movements and cinematography.
 
 ## Features
@@ -18,10 +20,10 @@ A Django-based platform for rating and reviewing art-house films, similar to IMD
 
 ## Tech Stack
 
-- Python 3.9
-- Django 5.1
+- Python 3.12
+- Django 5.0
 - Django REST Framework
-- PostgreSQL 13
+- PostgreSQL 15
 - Docker & Docker Compose
 - Nginx
 - Prometheus & Grafana
@@ -32,14 +34,14 @@ A Django-based platform for rating and reviewing art-house films, similar to IMD
 
 - Docker and Docker Compose
 - Git
-- Python 3.9+ (for local development)
+- Python 3.12+ (for local development)
 - virtualenv (optional, for local development)
 
 ## Installation & Setup
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/maria-v-ch/movie-rating-platform.git
 cd movie_rating_platform
 ```
 
@@ -226,3 +228,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Admin Access
 The admin interface is available at `/admin/`. Credentials are managed through environment variables.
+
+## Screencast Recording
+A complete demonstration of the platform's features is available in the screencast recording (2024-01-17).
