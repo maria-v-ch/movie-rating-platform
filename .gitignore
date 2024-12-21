@@ -62,6 +62,9 @@ htmlcov/
 examplary_confs/
 examplary\ confs/
 docs/
+!docs/screenshots/*
+!docs/
+!docs/screenshots/screenshots/
 scripts/
 run_tests_ci.sh
 
@@ -103,3 +106,4 @@ running_deploy_results
 running tests results
 *running_tests_results
 *running_deploy_results
+test_output.txt
