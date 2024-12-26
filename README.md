@@ -2,6 +2,8 @@
 
 [GitHub Repository](https://github.com/maria-v-ch/movie-rating-platform)
 
+[ОБЗОР ПРОЕКТА](https://github.com/maria-v-ch/movie-rating-platform/blob/main/overview.md) НА РУССКОМ ЯЗЫКЕ, ВКЛЮЧАЮЩИЙ ОПИСАНИЕ ОСНОВНЫХ ФУНКЦИЙ, ТЕХНИЧЕСКОЙ РЕАЛИЗАЦИИ С ПРИМЕРАМИ КОДА, ОСНОВНЫХ СЛОЖНОСТЕЙ. 
+
 A Django-based platform for rating and reviewing art-house films, similar to IMDb but focused on art cinema. The platform allows users to browse movies, leave reviews, and rate films while providing detailed information about art-house movements and cinematography.
 
 ## Features
