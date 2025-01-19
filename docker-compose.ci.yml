@@ -5,7 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python manage.py test
+    command: >
+      sh -c "python manage.py test --keepdb &&
+             python manage.py flush --no-input"
     environment:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
