@@ -156,14 +156,29 @@ jobs:
           echo "Created logs directory with appropriate permissions"
 
           # Install required packages
-          sudo apt-get update
-          sudo apt-get install -y apache2 gettext-base
+          echo "Updating package lists..."
+          for i in {1..3}; do
+              if sudo apt-get update -y --timeout=300; then
+                  break
+              fi
+              echo "Package list update attempt $i failed, retrying..."
+              sleep 10
+          done
+
+          echo "Installing required packages..."
+          for i in {1..3}; do
+              if DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends apache2 gettext-base; then
+                  break
+              fi
+              echo "Package installation attempt $i failed, retrying..."
+              sleep 10
+          done
 
           # Enable required Apache modules
-          sudo a2enmod proxy
-          sudo a2enmod proxy_http
-          sudo a2enmod ssl
-          sudo a2enmod rewrite
+          echo "Enabling Apache modules..."
+          for module in proxy proxy_http ssl rewrite; do
+              sudo a2enmod $module || echo "Warning: Failed to enable $module"
+          done
 
           # Create initial HTTP-only Apache configuration
           cat << EOF | sudo tee /etc/apache2/sites-available/paragoni.space.conf
