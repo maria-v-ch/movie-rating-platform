@@ -22,23 +22,52 @@ services:
 
         echo "Database is ready"
         
-        # Force terminate existing connections before tests
+        # Force terminate ALL existing connections before tests
         echo "Cleaning up existing connections..."
-        psql -h db -U postgres -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname IN ('\''postgres'\'', '\''test_postgres'\'');" || true
+        psql -h db -U postgres -d postgres -c "
+          SELECT pg_terminate_backend(pid) 
+          FROM pg_stat_activity 
+          WHERE datname IN ('\''postgres'\'', '\''test_postgres'\'')
+          AND pid <> pg_backend_pid();" || true
         
-        # Drop test database if exists
+        # Drop test database if exists with retries
         echo "Dropping test database if exists..."
-        psql -h db -U postgres -d postgres -c "DROP DATABASE IF EXISTS test_postgres WITH (FORCE);"
+        for i in {1..5}; do
+          if psql -h db -U postgres -d postgres -c "DROP DATABASE IF EXISTS test_postgres WITH (FORCE);" 2>/dev/null; then
+            echo "Successfully dropped test database"
+            break
+          fi
+          echo "Attempt $$i: Failed to drop test database, retrying after cleanup..."
+          psql -h db -U postgres -d postgres -c "
+            SELECT pg_terminate_backend(pid)
+            FROM pg_stat_activity
+            WHERE datname = '\''test_postgres'\'';" || true
+          sleep 2
+        done
         
         # Run tests
         echo "Running tests..."
         python manage.py test --settings=config.test_settings --noinput
         EXIT_CODE=$$?
         
-        # Clean up after tests regardless of test result
+        # Clean up after tests with retries
         echo "Cleaning up after tests..."
-        psql -h db -U postgres -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname IN ('\''postgres'\'', '\''test_postgres'\'');"
-        psql -h db -U postgres -d postgres -c "DROP DATABASE IF EXISTS test_postgres WITH (FORCE);"
+        for i in {1..5}; do
+          # First terminate all connections
+          psql -h db -U postgres -d postgres -c "
+            SELECT pg_terminate_backend(pid)
+            FROM pg_stat_activity
+            WHERE datname IN ('\''postgres'\'', '\''test_postgres'\'')
+            AND pid <> pg_backend_pid();" || true
+          
+          # Then try to drop the database
+          if psql -h db -U postgres -d postgres -c "DROP DATABASE IF EXISTS test_postgres WITH (FORCE);" 2>/dev/null; then
+            echo "Successfully cleaned up test database"
+            break
+          fi
+          echo "Attempt $$i: Failed to clean up test database, retrying after cleanup..."
+          sleep 2
+        done
         
         exit $$EXIT_CODE
       '
