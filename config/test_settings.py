@@ -6,35 +6,25 @@ from .settings import *  # noqa: F403, F401
 INSTALLED_APPS = [app for app in INSTALLED_APPS if not app.startswith('django_prometheus')]  # noqa: F405
 MIDDLEWARE = [m for m in MIDDLEWARE if not m.startswith('django_prometheus')]  # noqa: F405
 
-# Database settings for tests - using regular PostgreSQL backend instead of Prometheus
+# Database settings for tests
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",  # Regular backend for tests
-        "NAME": os.environ.get("DB_NAME", "postgres"),  # noqa: F405
-        "USER": os.environ.get("DB_USER", "postgres"),  # noqa: F405
-        "PASSWORD": os.environ.get("DB_PASSWORD") or os.environ.get("TEST_DB_PASSWORD"),  # noqa: F405
-        "HOST": os.environ.get("DB_HOST", "localhost"),  # noqa: F405
-        "PORT": os.environ.get("DB_PORT", "5432"),  # noqa: F405
-        "TEST": {
-            "NAME": "test_postgres",
-            "SERIALIZE": False,
-            "CREATE_DB": True,
-            "DEPENDENCIES": [],
-            "MIRROR": None,
-            "CHARSET": "UTF8",
-            "TEMPLATE": None,
-            "PRESERVE_DB": False,
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+        'CONN_MAX_AGE': 0,  # disable persistent connections
+        'OPTIONS': {
+            'connect_timeout': 5,
         },
-        "CONN_MAX_AGE": 0,  # Disable persistent connections
-        "CONN_HEALTH_CHECKS": False,
-        "OPTIONS": {
-            "connect_timeout": 10,
-            "options": "-c statement_timeout=30000",
-        },
-        "ATOMIC_REQUESTS": False,
-        "AUTOCOMMIT": True,
     }
 }
+
+# Disable any background tasks or async operations during tests
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 # Use memory cache for tests
 CACHES = {
