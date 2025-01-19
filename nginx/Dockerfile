@@ -1,14 +1,18 @@
 FROM nginx:latest
 
+# Install curl for health checks
 RUN apt-get update && \
     apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/* 
+    rm -rf /var/lib/apt/lists/*
 
-# Create necessary directories
+# Remove default nginx config
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Create directory for our config
 RUN mkdir -p /etc/nginx/conf.d
 
-# Copy SSL configuration
-COPY ssl.conf /etc/nginx/conf.d/ssl.conf
+# Copy our config
+COPY ssl.conf /etc/nginx/conf.d/default.conf
 
-# Make sure the file has proper permissions
-RUN chmod 644 /etc/nginx/conf.d/ssl.conf
+# Set proper permissions
+RUN chmod 644 /etc/nginx/conf.d/default.conf
