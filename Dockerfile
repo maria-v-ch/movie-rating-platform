@@ -36,6 +36,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     postgresql-client \
     libpq5 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy wheels and requirements from builder
@@ -53,6 +54,15 @@ RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
     chmod g+s /app/logs /app/media/posters /app/staticfiles && \
     chmod 777 /app/logs /app/media/posters /app/staticfiles
 
+# Create health check script
+RUN echo '#!/bin/bash\n\
+if ! pgrep -f "gunicorn.*config.wsgi:application" > /dev/null; then\n\
+    echo "Gunicorn not running"\n\
+    exit 1\n\
+fi\n\
+curl -f http://localhost:8080/health/ || exit 1' > /app/healthcheck.sh && \
+    chmod +x /app/healthcheck.sh
+
 # Copy project files
 COPY --chown=app_user:app_user . .
 
@@ -64,4 +74,4 @@ RUN chmod +x /app/entrypoint.sh
 USER app_user
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8080"]
