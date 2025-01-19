@@ -56,11 +56,28 @@ RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
 
 # Create health check script
 RUN echo '#!/bin/bash\n\
+echo "Running health check..."\n\
 if ! pgrep -f "gunicorn.*config.wsgi:application" > /dev/null; then\n\
-    echo "Gunicorn not running"\n\
+    echo "Gunicorn not running, checking if migrations are in progress..."\n\
+    if pgrep -f "python manage.py migrate" > /dev/null; then\n\
+        echo "Migrations are still running, health check will pass"\n\
+        exit 0\n\
+    fi\n\
+    if pgrep -f "python manage.py collectstatic" > /dev/null; then\n\
+        echo "Collecting static files, health check will pass"\n\
+        exit 0\n\
+    fi\n\
+    echo "No startup tasks running, failing health check"\n\
     exit 1\n\
 fi\n\
-curl -f http://localhost:8080/health/ || exit 1' > /app/healthcheck.sh && \
+echo "Gunicorn is running, checking health endpoint..."\n\
+if curl -f http://localhost:8080/health/ 2>/dev/null; then\n\
+    echo "Health endpoint responded successfully"\n\
+    exit 0\n\
+else\n\
+    echo "Health endpoint failed to respond"\n\
+    exit 1\n\
+fi' > /app/healthcheck.sh && \
     chmod +x /app/healthcheck.sh
 
 # Copy project files
