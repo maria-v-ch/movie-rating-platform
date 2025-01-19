@@ -5,48 +5,41 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: >
-      sh -c "python manage.py test --keepdb &&
-             python manage.py flush --no-input"
+    command: python manage.py test --settings=config.test_settings
     environment:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-      - DB_NAME=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=${TEST_DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    user: app_user
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+      - GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
       redis:
-        condition: service_started
-    healthcheck:
-      test: ["CMD", "python", "-c", "import socket; socket.socket().connect(('db', 5432))"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+        condition: service_healthy
 
   db:
-    image: postgres:13
+    image: postgres:15
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${TEST_DB_PASSWORD:-testpassword}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:6-alpine
+    image: redis:7
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
