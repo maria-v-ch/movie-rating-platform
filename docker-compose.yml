@@ -132,6 +132,8 @@ services:
     depends_on:
       web:
         condition: service_healthy
+    networks:
+      - app_network
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost/health/ || curl -f -k https://localhost/health/ || nginx -t || exit 1"]
       interval: 30s
