@@ -6,14 +6,17 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# Install system dependencies required for building
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libpq-dev
+    apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    python3-dev
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY requirements/base.txt .
 RUN pip install --upgrade pip && \
-    pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+    pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r base.txt
 
 # Final stage
 FROM python:3.10-slim
@@ -28,25 +31,20 @@ ENV DJANGO_SETTINGS_MODULE=config.settings
 RUN useradd -m -U app_user && \
     mkdir -p /home/app_user
 
-# Install system dependencies
+# Install only runtime dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     postgresql-client \
-    netcat-traditional \
-    wget \
-    gcc \
-    libpq-dev \
-    curl \
+    libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy wheels and requirements from builder
 COPY --from=builder /app/wheels /wheels
-COPY --from=builder /app/requirements.txt .
+COPY --from=builder /app/base.txt requirements.txt
 
 # Install Python packages
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir --find-links=/wheels -r requirements.txt && \
-    pip install django-filter gunicorn
+    pip install --no-cache-dir --find-links=/wheels -r requirements.txt
 
 # Create necessary directories and set permissions
 RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
