@@ -20,7 +20,6 @@ DATABASES = {
         'OPTIONS': {
             'connect_timeout': 5,
             'application_name': 'django_tests',
-            'client_min_messages': 'WARNING',
         },
         'TEST': {
             'NAME': 'test_postgres',
