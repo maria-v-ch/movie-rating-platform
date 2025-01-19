@@ -37,6 +37,7 @@ RUN apt-get update && \
     postgresql-client \
     libpq5 \
     curl \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy wheels and requirements from builder
@@ -56,23 +57,24 @@ RUN mkdir -p /app/media/posters /app/logs /app/staticfiles && \
 
 # Create health check script
 RUN echo '#!/bin/bash\n\
-echo "Running health check..."\n\
-if ! pgrep -f "gunicorn.*config.wsgi:application" > /dev/null; then\n\
-    echo "Gunicorn not running, checking if migrations are in progress..."\n\
-    if pgrep -f "python manage.py migrate" > /dev/null; then\n\
-        echo "Migrations are still running, health check will pass"\n\
-        exit 0\n\
-    fi\n\
-    if pgrep -f "python manage.py collectstatic" > /dev/null; then\n\
-        echo "Collecting static files, health check will pass"\n\
-        exit 0\n\
-    fi\n\
-    echo "No startup tasks running, failing health check"\n\
+echo "[$(date)] Running health check..."\n\
+\n\
+# Check if any Django management command is running\n\
+if ps aux | grep -q "[p]ython manage.py"; then\n\
+    echo "Django management command is running, health check passes"\n\
+    exit 0\n\
+fi\n\
+\n\
+# Check if Gunicorn is running\n\
+if ! ps aux | grep -q "[g]unicorn.*config.wsgi:application"; then\n\
+    echo "Gunicorn is not running"\n\
     exit 1\n\
 fi\n\
-echo "Gunicorn is running, checking health endpoint..."\n\
-if curl -f http://localhost:8080/health/ 2>/dev/null; then\n\
-    echo "Health endpoint responded successfully"\n\
+\n\
+# Check health endpoint\n\
+echo "Checking health endpoint..."\n\
+if curl -s -f http://localhost:8080/health/ > /dev/null; then\n\
+    echo "Health endpoint is responding"\n\
     exit 0\n\
 else\n\
     echo "Health endpoint failed to respond"\n\
