@@ -16,13 +16,21 @@ DATABASES = {
         'HOST': os.environ.get('DB_HOST', 'db'),  # noqa: F405
         'PORT': os.environ.get('DB_PORT', '5432'),  # noqa: F405
         'CONN_MAX_AGE': 0,  # disable persistent connections
+        'ATOMIC_REQUESTS': False,
         'OPTIONS': {
             'connect_timeout': 5,
-            'application_name': 'django_tests',  # helps identify test connections
+            'application_name': 'django_tests',
+            'client_min_messages': 'WARNING',
         },
         'TEST': {
             'NAME': 'test_postgres',
             'SERIALIZE': False,
+            'MIRROR': None,
+            'DEPENDENCIES': [],
+            'CREATE_DB': True,
+            'CREATE_USER': False,
+            'CHARSET': None,
+            'COLLATION': None,
             'PRESERVE_DB': False,
         },
     }
@@ -69,3 +77,6 @@ DJANGO_PROMETHEUS_EXPORT_MIGRATIONS_METRICS = False
 DJANGO_PROMETHEUS_ENABLE_METRICS = False
 PROMETHEUS_METRICS_EXPORT_PORT = None
 PROMETHEUS_METRICS_EXPORT_ADDRESS = None
+
+# Use test runner that properly closes connections
+TEST_RUNNER = 'config.test_runner.CustomTestRunner'
