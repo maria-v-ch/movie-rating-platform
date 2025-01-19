@@ -2,6 +2,10 @@
 
 from .settings import *  # noqa: F403, F401
 
+# Disable Prometheus metrics collection during tests
+INSTALLED_APPS = [app for app in INSTALLED_APPS if not app.startswith('django_prometheus')]  # noqa: F405
+MIDDLEWARE = [m for m in MIDDLEWARE if not m.startswith('django_prometheus')]  # noqa: F405
+
 # Database settings for tests - using regular PostgreSQL backend instead of Prometheus
 DATABASES = {
     "default": {
@@ -19,28 +23,18 @@ DATABASES = {
             "MIRROR": None,
             "CHARSET": "UTF8",
             "TEMPLATE": None,
-            # Force close connections
             "PRESERVE_DB": False,
-            "CREATE_USER": True,
-            "USER": None,
-            "PASSWORD": None,
-            "COLLATION": None,
         },
-        # Disable persistent connections
-        "CONN_MAX_AGE": 0,
+        "CONN_MAX_AGE": 0,  # Disable persistent connections
         "CONN_HEALTH_CHECKS": False,
         "OPTIONS": {
             "connect_timeout": 10,
-            # Set statement timeout to prevent hanging connections
             "options": "-c statement_timeout=30000",
         },
         "ATOMIC_REQUESTS": False,
         "AUTOCOMMIT": True,
     }
 }
-
-# Disable Prometheus metrics collection during tests
-MIDDLEWARE = [m for m in MIDDLEWARE if not m.startswith("django_prometheus")]  # noqa: F405
 
 # Use memory cache for tests
 CACHES = {
@@ -72,3 +66,10 @@ LOGGING = {
         "level": "CRITICAL",
     },
 }
+
+# Custom test runner to handle database cleanup
+TEST_RUNNER = "django.test.runner.DiscoverRunner"
+
+# Disable Prometheus database instrumentation
+DJANGO_PROMETHEUS_EXPORT_DATABASE_METRICS = False
+DJANGO_PROMETHEUS_EXPORT_MIGRATIONS_METRICS = False

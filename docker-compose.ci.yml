@@ -6,8 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "python manage.py test --settings=config.test_settings --noinput --keepdb &&
-             python manage.py flush --settings=config.test_settings --no-input"
+      sh -c "
+        python manage.py test --settings=config.test_settings --noinput --keepdb &&
+        python manage.py flush --settings=config.test_settings --no-input &&
+        psql -h db -U postgres -d postgres -c 'SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = ''test_postgres'';'
+      "
     environment:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
