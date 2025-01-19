@@ -3,13 +3,13 @@ version: '3.8'
 services:
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 config.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8080 config.wsgi:application
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
       - logs_volume:/app/logs
     ports:
-      - "8000:8000"
+      - "8080:8080"
     env_file:
       - .env
     depends_on:
@@ -30,7 +30,7 @@ services:
       - DB_HOST=db
       - DB_PORT=${DB_PORT:-5432}
     healthcheck:
-      test: ["CMD-SHELL", "curl -H 'Host: web' -f http://localhost:8000/health/ || exit 1"]
+      test: ["CMD-SHELL", "curl -H 'Host: web' -f http://localhost:8080/health/ || exit 1"]
       interval: 60s
       timeout: 30s
       retries: 5
@@ -111,11 +111,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/media:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
+      - ./nginx/ssl.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       web:
         condition: service_healthy
