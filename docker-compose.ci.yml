@@ -56,6 +56,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - DJANGO_SETTINGS_MODULE=config.test_settings
+      - SECRET_KEY=${SECRET_KEY}
 
   db:
     image: postgres:15
