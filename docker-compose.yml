@@ -108,25 +108,25 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/media:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf:ro
     depends_on:
       web:
         condition: service_healthy
     networks:
       - app_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health/"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost/health/ || exit 1"]
+      interval: 10s
+      timeout: 5s
       retries: 3
-      start_period: 60s
+      start_period: 30s
 
 networks:
   app_network:
