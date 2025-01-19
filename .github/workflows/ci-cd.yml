@@ -49,8 +49,8 @@ jobs:
     - name: Run tests
       run: |
         echo "Starting tests with CI configuration..."
-        export TEST_DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
-        export SECRET_KEY=${{ secrets.SECRET_KEY }}
+        export TEST_DB_PASSWORD="${{ secrets.TEST_DB_PASSWORD }}"
+        export SECRET_KEY="${{ secrets.SECRET_KEY }}"
         docker-compose -f docker-compose.ci.yml config
         docker-compose -f docker-compose.ci.yml up -d db redis
         
