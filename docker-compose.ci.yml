@@ -5,12 +5,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python manage.py test --settings=config.test_settings
+    command: >
+      sh -c "python manage.py test --settings=config.test_settings --noinput --keepdb &&
+             python manage.py flush --settings=config.test_settings --no-input"
     environment:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
+      - DB_NAME=postgres
+      - DB_USER=postgres
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=5432
@@ -27,11 +29,11 @@ services:
   db:
     image: postgres:15
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5

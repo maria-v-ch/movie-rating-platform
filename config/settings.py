@@ -214,9 +214,6 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = "users.User"
 
-# Test Runner
-TEST_RUNNER = "config.test_runner.CustomTestRunner"
-
 # Logging Configuration
 LOGGING = {
     "version": 1,

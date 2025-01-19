@@ -14,9 +14,28 @@ DATABASES = {
         "TEST": {
             "NAME": "test_postgres",
             "SERIALIZE": False,
+            "CREATE_DB": True,
+            "DEPENDENCIES": [],
+            "MIRROR": None,
+            "CHARSET": "UTF8",
+            "TEMPLATE": None,
+            # Force close connections
+            "PRESERVE_DB": False,
+            "CREATE_USER": True,
+            "USER": None,
+            "PASSWORD": None,
+            "COLLATION": None,
         },
-        "CONN_MAX_AGE": 0,  # Disable persistent connections
-        "ATOMIC_REQUESTS": False,  # Disable transaction wrapping
+        # Disable persistent connections
+        "CONN_MAX_AGE": 0,
+        "CONN_HEALTH_CHECKS": False,
+        "OPTIONS": {
+            "connect_timeout": 10,
+            # Set statement timeout to prevent hanging connections
+            "options": "-c statement_timeout=30000",
+        },
+        "ATOMIC_REQUESTS": False,
+        "AUTOCOMMIT": True,
     }
 }
 
