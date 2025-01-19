@@ -295,11 +295,3 @@ POPULAR_MOVIES_CACHE_TIMEOUT = 60 * 60 * 12
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
-# Trigger rebuild
-
-# Trigger fresh deployment for screencast recording
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    # ... existing code ...
-]
