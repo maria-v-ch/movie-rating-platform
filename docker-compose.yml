@@ -44,7 +44,7 @@ services:
       - DB_HOST=db
       - DB_PORT=${DB_PORT:-5432}
     healthcheck:
-      test: ["CMD-SHELL", "echo '[$(date)] Running health check...' && if ps aux | grep -q '[p]ython manage.py'; then echo 'Django management command is running, health check passes' && exit 0; fi && if ! ps aux | grep -q '[g]unicorn.*config.wsgi:application'; then echo 'Gunicorn is not running' && exit 1; fi && echo 'Checking health endpoint...' && if curl -s -f http://localhost:8000/health/ > /dev/null; then echo 'Health endpoint is responding' && exit 0; else echo 'Health endpoint failed to respond' && exit 1"]
+      test: ["CMD-SHELL", "echo '[$$(date)] Running health check...' && if ps aux | grep -q '[p]ython manage.py'; then echo 'Django management command is running, health check passes' && exit 0; fi && if ! ps aux | grep -q '[g]unicorn.*config.wsgi:application'; then echo 'Gunicorn is not running' && exit 1; fi && echo 'Checking health endpoint...' && if curl -s -f http://localhost:8000/health/ > /dev/null; then echo 'Health endpoint is responding' && exit 0; else echo 'Health endpoint failed to respond' && exit 1; fi"]
       interval: 10s
       timeout: 5s
       retries: 20
