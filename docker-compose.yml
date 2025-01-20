@@ -135,7 +135,7 @@ services:
     networks:
       - app_network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ || curl -f -k https://localhost:8443/health/ || nginx -t || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost/health/ || curl -f -k https://localhost/health/ || nginx -t || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
