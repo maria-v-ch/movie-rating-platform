@@ -16,14 +16,14 @@ services:
         python manage.py createsuperuser --noinput || true &&
         echo 'Superuser creation completed' &&
         echo 'Starting Gunicorn...' &&
-        exec gunicorn --bind 0.0.0.0:8080 config.wsgi:application
+        exec gunicorn --bind 0.0.0.0:8000 config.wsgi:application
       "
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
       - logs_volume:/app/logs
     ports:
-      - "8080:8080"
+      - "8000:8000"
     env_file:
       - .env
     depends_on:
