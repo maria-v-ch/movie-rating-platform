@@ -95,6 +95,7 @@ docker-compose.override.yml
 # Server configuration
 paragoni.space.conf
 nginx/ssl.conf
+docs/github_secrets.md
 
 # Linting and type checking outputs
 flake8_output.txt
