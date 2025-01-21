@@ -61,10 +61,12 @@ htmlcov/
 .specs/
 examplary_confs/
 examplary\ confs/
-docs/
-!docs/screenshots/*
-!docs/
-!docs/screenshots/screenshots/
+
+# Documentation
+docs/*
+!docs/screenshots/
+docs/github_secrets.md
+
 scripts/
 run_tests_ci.sh
 
@@ -95,7 +97,6 @@ docker-compose.override.yml
 # Server configuration
 paragoni.space.conf
 nginx/ssl.conf
-docs/github_secrets.md
 
 # Linting and type checking outputs
 flake8_output.txt
